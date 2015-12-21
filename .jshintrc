@@ -1,0 +1,11 @@
+{
+  "undef": true,
+  "unused": false,
+  "predef": [
+    "console", "requestAnimationFrame", "process",
+    "__dirname", "module", "importScripts", "createjs", "setTimeout",
+    "clearTimeout", "require", "document", "Worker", "onmessage", "postMessage",
+    "setInterval", "clearInterval"
+  ],
+  "esnext": true
+}

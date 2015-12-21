@@ -1,0 +1,49 @@
+{
+  "name": "lecon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/helloncanella/lecon.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/helloncanella/lecon/issues"
+  },
+  "homepage": "https://github.com/helloncanella/lecon#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.0.15",
+    "babel-preset-react": "^6.0.15",
+    "babelify": "^7.2.0",
+    "browser-sync": "^2.9.11",
+    "browserify": "^12.0.1",
+    "flux": "^2.1.1",
+    "glob": "^5.0.15",
+    "gulp": "^3.9.0",
+    "gulp-autoprefixer": "latest",
+    "gulp-babel": "^6.0.0",
+    "gulp-load-plugins": "^1.0.0",
+    "gulp-plumber": "^1.0.1",
+    "gulp-sass": "latest",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-util": "^3.0.7",
+    "keymirror": "^0.1.1",
+    "react": "latest",
+    "react-dom": "^0.14.2",
+    "lodash": "latest",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.6.0",
+    "webworkify": "^1.0.2"
+  },
+  "dependencies": {
+    "express": "^4.13.3",
+    "react": "^0.14.3"
+  }
+}

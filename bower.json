@@ -1,0 +1,23 @@
+{
+  "name": "lecon",
+  "homepage": "https://github.com/helloncanella/lecon",
+  "authors": [
+    "Hellon Canella <helloncanella@gmail.com>"
+  ],
+  "directory": "/app",
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "EaselJS": "easeljs#~0.8.2"
+  }
+}
