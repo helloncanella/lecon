@@ -1,14 +1,13 @@
 import React from 'react';
+import Shape from './auxiliar/Shape';
 
-var self,
-  selection;
+var self,  selection;
 
 class Canvas extends React.Component {
 
   constructor(props) {
     super(props);
     self = this;
-
     this.restartProcesses();
   }
 
@@ -37,7 +36,7 @@ class Canvas extends React.Component {
       mousedown: function(e) {
         self.processes.mousedown = true;
 
-        shape = new createjs.Shape();
+        shape = new Shape();
         shape.x = e.offsetX;
         shape.y = e.offsetY;
 
@@ -50,33 +49,39 @@ class Canvas extends React.Component {
       },
       mousemove: function(e) {
         if (self.processes.mousedown) {
-
           let distance = {
             x: e.offsetX - shape.x,
             y: e.offsetY - shape.y
           };
-
           if (self.processes.selecting) {
+            shape.name = 'selection';
             shape.graphics.clear();
             shape.graphics
                 .beginStroke('black')
                 .setStrokeDash([10, 2], 0)
                 .drawRect(0,0,distance.x, distance.y);
+            shape.width = distance.x;
+            shape.height = distance.y;
           } else {
             self.cancelSelection();
             self.processes.drawing = true;
             if (!self.processes.drawingStarted) {
+              shape.name = 'stroke';
+              shape.points = [];
               shape.graphics.beginStroke('red').moveTo(0, 0);
+              shape.points.push({x:(0+shape.x), y:(0+shape.y)});
               self.processes.drawingStarted = true;
             } else {
               shape.graphics.lineTo(distance.x, distance.y);
+              shape.points.push({x:(distance.x+shape.x), y:(distance.y+shape.y)});
             }
           }
-
           self.stage.update();
         }
       },
       mouseup: function() {
+        shape.setAABB();
+        console.log(shape.getBounds());
         self.restartProcesses();
       }
     });

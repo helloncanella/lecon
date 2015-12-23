@@ -1,5 +1,5 @@
 import React from 'react';
-import Canvas from './components/Canvas';
+import Canvas from './components/Canvas/Canvas';
 
 var self, canvas={};
 
@@ -13,7 +13,7 @@ class AppView extends React.Component {
     $(window).resize(function(){
       self.forceUpdate();
     });
-  } 
+  }
 
 
   render () {
