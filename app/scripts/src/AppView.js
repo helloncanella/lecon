@@ -1,17 +1,24 @@
 import React from 'react';
-import createjs from '../vendors/EaselJS/lib/easeljs-0.8.2.combined';
+import Canvas from './components/Canvas';
 
+var self, canvas={};
 
 class AppView extends React.Component {
   constructor(props) {
     super(props);
+    self = this;
   }
+
+  componentDidMount(){
+    $(window).resize(function(){
+      self.forceUpdate();
+    });
+  } 
+
 
   render () {
     return(
-      <div className='App'>
-        <h1>teco</h1>
-      </div>
+      <Canvas id={'canvas'} width={$(window).width()} height={$(window).height()}/>
     );
   }
 

@@ -1,0 +1,21 @@
+Steps to build the canvas.
+
+  Mousedown
+
+  * when "mousedown" register the offset
+  * set the shape position with the same position of mousedown's offset
+  * set the isDrawing as true
+  * insert shape into the stage
+
+  Mousemove
+
+  * if the isDrawing is true
+
+    - calculate the distance between the offset of the mouse's pointer and the
+      original point
+    - draw 
+    - update the stage.
+
+  Mouseup
+
+  * set isDrawing as false
