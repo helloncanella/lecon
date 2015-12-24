@@ -1,7 +1,7 @@
 import React from 'react';
 import Shape from './auxiliar/Shape';
 
-var self,  selection;
+var self,  selection, selectionRegion, selectedShapes = [];
 
 class Canvas extends React.Component {
 
@@ -16,7 +16,8 @@ class Canvas extends React.Component {
       mousedown: false,
       selecting: false,
       drawing: false,
-      drawingStarted: false
+      drawingStarted: false,
+      movingSelection: false,
     };
   }
 
@@ -36,18 +37,31 @@ class Canvas extends React.Component {
       mousedown: function(e) {
         self.processes.mousedown = true;
 
-        shape = new Shape();
-        shape.x = e.offsetX;
-        shape.y = e.offsetY;
-        shape.points = [];
+        // verifying if there is a selection container.
+        let selector = self.stage.getChildByName('selection');
 
-        self.stage.addChild(shape);
+        if(selector){
+          if(isInsideRegion({x:e.offsetX, y:e.offsetY})){
 
-        shape.points.push({x:shape.x, y:shape.y});
+          }else{
+            self.stage.removeChild(selector);
+            self.stage.update();
+            selectedShapes = [];
+          }
+        }else{
+          shape = new Shape();
+          shape.x = e.offsetX;
+          shape.y = e.offsetY;
+          shape.points = [];
 
-        selection = setTimeout(function() {
-          self.processes.selecting = true;
-        }, 200);
+          self.stage.addChild(shape);
+
+          shape.points.push({x: shape.x, y: shape.y});
+
+          selection = setTimeout(function() {
+            self.processes.selecting = true;
+          }, 200);
+        }
 
       },
       mousemove: function(e) {
@@ -60,20 +74,23 @@ class Canvas extends React.Component {
           if (self.processes.selecting) {
             shape.name = 'selection';
             shape.graphics.clear();
-            shape.graphics
-                .beginStroke('black')
-                .setStrokeDash([10, 2], 0)
-                .drawRect(0,0,distance.x, distance.y);
+            shape.graphics.beginStroke('black').setStrokeDash([
+              10, 2,
+            ], 0).drawRect(0, 0, distance.x, distance.y);
             shape.width = distance.x;
             shape.height = distance.y;
 
             //removing the last element
-            if(shape.points[1]){
-              shape.points.splice(1,1);
-            }
-            shape.points.push({x:(shape.x+distance.x), y:(shape.y+distance.y)});
+            if (shape.points[1]) {shape.points.splice(1, 1);}
+            shape.points.push({
+              x: (shape.x + distance.x),
+              y: (shape.y + distance.y)
+            });
 
-          } else {
+          }else if (self.processes.movingSelection){
+
+          }
+          else {
             self.cancelSelection();
             self.processes.drawing = true;
             if (!self.processes.drawingStarted) {
@@ -82,54 +99,56 @@ class Canvas extends React.Component {
               self.processes.drawingStarted = true;
             } else {
               shape.graphics.lineTo(distance.x, distance.y);
-              shape.points.push({x:(distance.x+shape.x), y:(distance.y+shape.y)});
+              shape.points.push({
+                x: (distance.x + shape.x),
+                y: (distance.y + shape.y)
+              });
             }
           }
           self.stage.update();
         }
       },
       mouseup: function() {
-        shape.setAABB();
         self.restartProcesses();
+
+        if(shape.points.length>1){
+          shape.setAABB();
+        }
+
         let region = shape.getBounds();
-        if(shape.name == 'selection'){
+        if (shape.name == 'selection') {
           let region = shape.getBounds();
           let children = self.stage.children;
-          let selected = [];
 
-          let selection ={
-            start:{x:region.x,y:region.y},
-            end:{x:(region.x+region.width),y:(region.y+region.height)}
+          selectionRegion = {
+            start: {
+              x: region.x,
+              y: region.y
+            },
+            end: {
+              x: (region.x + region.width),
+              y: (region.y + region.height)
+            }
           };
 
-          children.forEach(function(child){
-            if(child.name !== 'selection'){
+          children.forEach(function(child) {
+            if (child.name !== 'selection') {
               let bounds = child.getBounds();
               let childStart = {
                 x: bounds.x,
                 y: bounds.y
               };
               let childEnd = {
-                x: bounds.x+bounds.width,
-                y: bounds.y+bounds.height
+                x: (bounds.x + bounds.width),
+                y: (bounds.y + bounds.height)
               };
 
-              let childStartXIsInside = (selection.start.x < childStart.x) && (childStart.x < selection.end.x);
-              let childStartYIsInside = (selection.start.y < childStart.y) && (childStart.y < selection.end.y);
-
-              let childEndXIsInside = (selection.start.x < childEnd.x) && (childEnd.x < selection.end.x);
-              let childEndYIsInside = (selection.start.y < childEnd.y) && (childEnd.y < selection.end.y);
-
-              let childStartIsInside = childStartXIsInside && childStartYIsInside;
-              let childEndIsInside = childEndXIsInside && childEndYIsInside;
-
+              let childStartIsInside = isInsideRegion(childStart);
+              let childEndIsInside = isInsideRegion(childEnd);
 
               let childIsInside = childStartIsInside && childEndIsInside;
 
-
-              if(childIsInside){
-                selected.push(child);
-              }
+              if (childIsInside) {selectedShapes.push(child);}
             }
           });
 
@@ -138,6 +157,23 @@ class Canvas extends React.Component {
         }
       }
     });
+
+
+    function isInsideRegion(point) {
+
+      var pointIsInside = false;
+
+      if(selectionRegion){
+        let pointXIsInside = (selectionRegion.start.x < point.x) && (point.x < selectionRegion.end.x);
+        let pointYIsInside = (selectionRegion.start.y < point.y) && (point.y < selectionRegion.end.y);
+
+        pointIsInside = pointXIsInside && pointYIsInside;
+
+      }
+
+      return pointIsInside;
+
+    }
   }
 
   render () {

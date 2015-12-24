@@ -5,7 +5,8 @@ class Shape extends createjs.Shape {
 
     var aabb = new AABB(Object.assign({},this));
 
-    var width = aabb.width,
+    var
+      width = aabb.width,
       height = aabb.height,
       topLeft = Object.assign({}, aabb.topLeft);
 
