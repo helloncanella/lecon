@@ -39,8 +39,11 @@ class Canvas extends React.Component {
         shape = new Shape();
         shape.x = e.offsetX;
         shape.y = e.offsetY;
+        shape.points = [];
 
         self.stage.addChild(shape);
+
+        shape.points.push({x:shape.x, y:shape.y});
 
         selection = setTimeout(function() {
           self.processes.selecting = true;
@@ -53,6 +56,7 @@ class Canvas extends React.Component {
             x: e.offsetX - shape.x,
             y: e.offsetY - shape.y
           };
+
           if (self.processes.selecting) {
             shape.name = 'selection';
             shape.graphics.clear();
@@ -62,14 +66,19 @@ class Canvas extends React.Component {
                 .drawRect(0,0,distance.x, distance.y);
             shape.width = distance.x;
             shape.height = distance.y;
+
+            //removing the last element
+            if(shape.points[1]){
+              shape.points.splice(1,1);
+            }
+            shape.points.push({x:(shape.x+distance.x), y:(shape.y+distance.y)});
+
           } else {
             self.cancelSelection();
             self.processes.drawing = true;
             if (!self.processes.drawingStarted) {
               shape.name = 'stroke';
-              shape.points = [];
               shape.graphics.beginStroke('red').moveTo(0, 0);
-              shape.points.push({x:(0+shape.x), y:(0+shape.y)});
               self.processes.drawingStarted = true;
             } else {
               shape.graphics.lineTo(distance.x, distance.y);
@@ -81,8 +90,52 @@ class Canvas extends React.Component {
       },
       mouseup: function() {
         shape.setAABB();
-        console.log(shape.getBounds());
         self.restartProcesses();
+        let region = shape.getBounds();
+        if(shape.name == 'selection'){
+          let region = shape.getBounds();
+          let children = self.stage.children;
+          let selected = [];
+
+          let selection ={
+            start:{x:region.x,y:region.y},
+            end:{x:(region.x+region.width),y:(region.y+region.height)}
+          };
+
+          children.forEach(function(child){
+            if(child.name !== 'selection'){
+              let bounds = child.getBounds();
+              let childStart = {
+                x: bounds.x,
+                y: bounds.y
+              };
+              let childEnd = {
+                x: bounds.x+bounds.width,
+                y: bounds.y+bounds.height
+              };
+
+              let childStartXIsInside = (selection.start.x < childStart.x) && (childStart.x < selection.end.x);
+              let childStartYIsInside = (selection.start.y < childStart.y) && (childStart.y < selection.end.y);
+
+              let childEndXIsInside = (selection.start.x < childEnd.x) && (childEnd.x < selection.end.x);
+              let childEndYIsInside = (selection.start.y < childEnd.y) && (childEnd.y < selection.end.y);
+
+              let childStartIsInside = childStartXIsInside && childStartYIsInside;
+              let childEndIsInside = childEndXIsInside && childEndYIsInside;
+
+
+              let childIsInside = childStartIsInside && childEndIsInside;
+
+
+              if(childIsInside){
+                selected.push(child);
+              }
+            }
+          });
+
+
+
+        }
       }
     });
   }

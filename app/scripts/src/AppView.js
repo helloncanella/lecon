@@ -1,7 +1,7 @@
 import React from 'react';
 import Canvas from './components/Canvas/Canvas';
 
-var self, canvas={};
+var self;
 
 class AppView extends React.Component {
   constructor(props) {

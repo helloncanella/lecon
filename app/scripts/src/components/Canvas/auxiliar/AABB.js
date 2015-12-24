@@ -4,9 +4,6 @@ class AABB {
 
     switch (shape.name) {
       case 'selection':
-        lowest = {x:shape.x, y:shape.y};
-        highest = {x:(shape.x+shape.width), y:(shape.y+shape.height)};
-        break;
       case 'stroke':
         var points = shape.points;
 
