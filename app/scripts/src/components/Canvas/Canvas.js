@@ -1,7 +1,7 @@
 import React from 'react';
 import Shape from './auxiliar/Shape';
 
-var self,  selection, selectionRegion, selectedShapes = [];
+var self,  selection, selectionRegion, selectedShapes = [], startPoint, selector;
 
 class Canvas extends React.Component {
 
@@ -37,21 +37,26 @@ class Canvas extends React.Component {
       mousedown: function(e) {
         self.processes.mousedown = true;
 
+        startPoint = {
+          x:e.offsetX,
+          y:e.offsetY
+        };
+
         // verifying if there is a selection container.
-        let selector = self.stage.getChildByName('selection');
+        selector = self.stage.getChildByName('selection');
 
         if(selector){
-          if(isInsideRegion({x:e.offsetX, y:e.offsetY})){
-
+          if(isInsideRegion({x:startPoint.x, y:startPoint.y})){
+            self.processes.movingSelection = true;
           }else{
+            selectedShapes = [];
             self.stage.removeChild(selector);
             self.stage.update();
-            selectedShapes = [];
           }
         }else{
           shape = new Shape();
-          shape.x = e.offsetX;
-          shape.y = e.offsetY;
+          shape.x = startPoint.x;
+          shape.y = startPoint.y;
           shape.points = [];
 
           self.stage.addChild(shape);
@@ -67,16 +72,18 @@ class Canvas extends React.Component {
       mousemove: function(e) {
         if (self.processes.mousedown) {
           let distance = {
-            x: e.offsetX - shape.x,
-            y: e.offsetY - shape.y
+            x: e.offsetX - startPoint.x,
+            y: e.offsetY - startPoint.y
           };
 
           if (self.processes.selecting) {
             shape.name = 'selection';
             shape.graphics.clear();
-            shape.graphics.beginStroke('black').setStrokeDash([
-              10, 2,
-            ], 0).drawRect(0, 0, distance.x, distance.y);
+
+            shape.graphics.beginStroke('black')
+                .setStrokeDash([10, 2,], 0)
+                .drawRect(0, 0, distance.x, distance.y);
+
             shape.width = distance.x;
             shape.height = distance.y;
 
@@ -88,22 +95,48 @@ class Canvas extends React.Component {
             });
 
           }else if (self.processes.movingSelection){
+            if(selectedShapes.length>0){
+
+              let allShapes = [].concat(selectedShapes, selector);
+
+              allShapes.forEach(function(shape){
+                shape.x += distance.x;
+                shape.y += distance.y;
+
+                shape.points.forEach(function(point){
+                  point.x += distance.x;
+                  point.y += distance.y;
+                });
+
+                shape.setAABB();
+              });
+
+              startPoint = {
+                x:e.offsetX,
+                y:e.offsetY
+              };
+
+              self.stage.update();
+            }
 
           }
           else {
             self.cancelSelection();
             self.processes.drawing = true;
+
             if (!self.processes.drawingStarted) {
               shape.name = 'stroke';
               shape.graphics.beginStroke('red').moveTo(0, 0);
               self.processes.drawingStarted = true;
-            } else {
+            }
+            else {
               shape.graphics.lineTo(distance.x, distance.y);
               shape.points.push({
                 x: (distance.x + shape.x),
                 y: (distance.y + shape.y)
               });
             }
+
           }
           self.stage.update();
         }
@@ -116,9 +149,10 @@ class Canvas extends React.Component {
         }
 
         let region = shape.getBounds();
-        if (shape.name == 'selection') {
+        if (shape.name == 'selection' && !self.processes.movingSelection) {
           let region = shape.getBounds();
           let children = self.stage.children;
+          selectedShapes = [];
 
           selectionRegion = {
             start: {
@@ -152,6 +186,7 @@ class Canvas extends React.Component {
             }
           });
 
+          console.log(selectedShapes);
 
 
         }
