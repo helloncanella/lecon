@@ -1,5 +1,6 @@
 import React from 'react';
 import Shape from './auxiliar/Shape';
+import SocketActions from '../../actions/SocketActions';
 
 var self,  selection, selectionRegion, selectedShapes = [], startPoint, selector;
 
@@ -27,6 +28,11 @@ class Canvas extends React.Component {
     self.processes.drawing = true;
   }
 
+  broadcast(shape,instruction){
+    SocketActions.updateShape(shape,instruction);
+  }
+
+
   componentDidMount () {
 
     let shape;
@@ -51,7 +57,10 @@ class Canvas extends React.Component {
           }else{
             selectedShapes = [];
             self.stage.removeChild(selector);
+
+            self.broadcast(selector,'remove');
             self.stage.update();
+
           }
         }else{
           shape = new Shape();
@@ -116,6 +125,7 @@ class Canvas extends React.Component {
                 y:e.offsetY
               };
 
+              self.broadcast(shape);
               self.stage.update();
             }
 
@@ -138,6 +148,7 @@ class Canvas extends React.Component {
             }
 
           }
+          self.broadcast(shape);
           self.stage.update();
         }
       },

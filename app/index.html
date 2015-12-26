@@ -12,19 +12,6 @@
   <script src='vendors/jquery/dist/jquery.min.js'></script>
   <script src='vendors/EaselJS/lib/easeljs-0.8.2.min.js'></script>
   <script src='scripts/dist/bundle.js'></script>
-  <script src='/socket.io/socket.io.js'></script>
-
-  <script>
-    var socket = io(); 
-
-    socket.on('news', function(data) {
-      console.log(data);
-      socket.emit('my other event', {
-        my: 'data'
-      });
-    });
-  </script>
-
   <script src="http://localhost:4500/livereload.js" charset="utf-8"></script>
 </body>
 
