@@ -65,7 +65,7 @@ class Canvas extends React.Component {
 
           selection = setTimeout(function() {
             self.processes.selecting = true;
-          }, 200);
+          }, 100);
         }
 
       },
@@ -149,7 +149,7 @@ class Canvas extends React.Component {
         }
 
         let region = shape.getBounds();
-        if (shape.name == 'selection' && !self.processes.movingSelection) {
+        if (shape.name == 'selection') {
           let region = shape.getBounds();
           let children = self.stage.children;
           selectedShapes = [];
@@ -186,9 +186,6 @@ class Canvas extends React.Component {
             }
           });
 
-          console.log(selectedShapes);
-
-
         }
       }
     });
@@ -203,7 +200,6 @@ class Canvas extends React.Component {
         let pointYIsInside = (selectionRegion.start.y < point.y) && (point.y < selectionRegion.end.y);
 
         pointIsInside = pointXIsInside && pointYIsInside;
-
       }
 
       return pointIsInside;

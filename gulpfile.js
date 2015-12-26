@@ -1,7 +1,6 @@
 var gulp = require('gulp');
 var plugins = require('gulp-load-plugins')();
 var gutil = require('gulp-util');
-var browserSync = require('browser-sync').create();
 var watchify = require('watchify');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
@@ -16,27 +15,15 @@ var sourceFiles = [],
 gulp.task('serve', [
   'browserify', 'sass',
 ], function() {
-
-  browserSync.init({
-    notify: false,
-    server: {
-      baseDir: 'app'
-    }
-  });
-
   gulp.watch('app/**/*.scss', ['sass']);
   gulp.watch('app/scripts/src/**/*.js', ['browserify']);
-  gulp.watch('app/*.html')
-    .on('change', browserSync.reload);
-
 });
 
 gulp.task('sass', function() {
-  gulp.src('./app/stylesheets/bundle.scss')
-    .pipe(plugins.sass().on('error', plugins.sass.logError))
-    .pipe(plugins.autoprefixer({browsers: ['last 2 versions'], cascade: false}))
-    .pipe(gulp.dest('./app/stylesheets/'))
-    .pipe(browserSync.stream());
+  gulp.src('./app/stylesheets/bundle.scss').pipe(plugins.sass().on('error', plugins.sass.logError)).pipe(plugins.autoprefixer({
+    browsers: ['last 2 versions'],
+    cascade: false
+  })).pipe(gulp.dest('./app/stylesheets/'));
 });
 
 gulp.task('browserify', bundle); // so you can run `gulp js` to build the file
@@ -53,10 +40,7 @@ function bundle() {
 
   return b.bundle()
   // log errors if they happen
-    .pipe(plugins.plumber())
-    .pipe(source('bundle.js'))
-    .pipe(gulp.dest('./app/scripts/dist'))
-    .pipe(browserSync.stream());
+    .pipe(plugins.plumber()).pipe(source('bundle.js')).pipe(gulp.dest('./app/scripts/dist'));
 }
 
 function configBrowserify() {
@@ -73,9 +57,7 @@ function configBrowserify() {
   // add transformations here
   // i.e. b.transform(coffeeify);
   b.transform('babelify', {
-    presets: [
-      'es2015', 'react',
-    ]
+    presets: ['es2015', 'react',]
   });
 
   b.on('update', bundle); // on any dep update, runs the bundler

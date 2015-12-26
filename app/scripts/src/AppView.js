@@ -13,8 +13,8 @@ class AppView extends React.Component {
     $(window).resize(function(){
       self.forceUpdate();
     });
-  }
 
+  }
 
   render () {
     return(
