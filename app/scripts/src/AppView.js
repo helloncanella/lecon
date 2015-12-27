@@ -1,7 +1,15 @@
 import React from 'react';
 import Canvas from './components/Canvas/Canvas';
 
+import CanvasStore from './stores/CanvasStore';
+
 var self;
+
+function getAppStates (){
+  return({
+    toUpdate: CanvasStore.getShapesToUpdate()
+  });
+}
 
 class AppView extends React.Component {
   constructor(props) {
@@ -13,11 +21,21 @@ class AppView extends React.Component {
     $(window).resize(function(){
       self.forceUpdate();
     });
+
+    CanvasStore.addChangeListener(this.onChange);
+  }
+
+  onChange (){
+    self.setState(getAppStates());
   }
 
   render () {
+
+    this.state = this.state || {};
+    let toUpdate = this.state.toUpdate || '';
+
     return(
-      <Canvas id={'canvas'} width={$(window).width()} height={$(window).height()}/>
+      <Canvas toUpdate={toUpdate} id={'canvas'} width={$(window).width()} height={$(window).height()}/>
     );
   }
 

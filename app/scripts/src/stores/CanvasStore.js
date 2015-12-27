@@ -4,12 +4,12 @@ import EventEmmitter from 'events';
 import AppDispatcher from '../dispatcher/AppDispatcher';
 import Constants from '../constants/AppConstants';
 
-var dataToBroadcast;
+var toUpdate;
 
-var SocketStore = _.assign({}, EventEmmitter.prototype, {
+var CanvasStore = _.assign({}, EventEmmitter.prototype, {
 
-  getDataToBroadcast: function(){
-    return dataToBroadcast;
+  getShapesToUpdate: function(){
+    return toUpdate;
   },
 
   emitChange: function(argument) {
@@ -27,16 +27,18 @@ var SocketStore = _.assign({}, EventEmmitter.prototype, {
   dispatchToken: AppDispatcher.register(function(action) {
 
     switch (action.type) {
-      case Constants.BROADCAST:
-        dataToBroadcast = action.data;
-        SocketStore.emitChange();
+      case Constants.UPDATE_STAGE:
+        toUpdate = action.data;
         break;
     }
 
+    CanvasStore.emitChange();
   }),
+
+
 
 });
 
 
 
-export default SocketStore;
+export default CanvasStore;

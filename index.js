@@ -12,9 +12,8 @@ app.get('/', function(req, res) {
 });
 
 io.on('connection', function(socket) {
-  socket.on('shape update', function(shape) {
-    console.log(shape);
-    // socket.broadcast.emit('shape', shape);
+  socket.on('shape update', function(data) {
+    socket.broadcast.emit('shape', data);
   });
 });
 

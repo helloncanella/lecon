@@ -2,7 +2,12 @@ import React from 'react';
 import Shape from './auxiliar/Shape';
 import SocketActions from '../../actions/SocketActions';
 
-var self,  selection, selectionRegion, selectedShapes = [], startPoint, selector;
+var self,
+  selection,
+  selectionRegion,
+  selectedShapes = [],
+  startPoint,
+  selector;
 
 class Canvas extends React.Component {
 
@@ -18,7 +23,7 @@ class Canvas extends React.Component {
       selecting: false,
       drawing: false,
       drawingStarted: false,
-      movingSelection: false,
+      movingSelection: false
     };
   }
 
@@ -28,10 +33,67 @@ class Canvas extends React.Component {
     self.processes.drawing = true;
   }
 
-  broadcast(shape,instruction){
-    SocketActions.updateShape(shape,instruction);
+  broadcast (shapes, instruction) {
+
+    let toBroadcast = [];
+
+    if (!(shapes instanceof Array)) {
+      shapes = [shapes];
+    }
+
+    shapes.forEach(function(shape) {
+      console.log(self.stage.getChildIndex(shape));
+      toBroadcast.push({name: shape.name, id: self.stage.getChildIndex(shape), graphics: shape.graphics, bounds: shape.getBounds(), points: shape.points, x: shape.x, y: shape.y});
+    });
+
+    SocketActions.broadcast(toBroadcast, instruction);
+
   }
 
+  componentWillReceiveProps (nextProps) {
+    let allShapes = nextProps.toUpdate.shapes;
+
+    console.log(allShapes);
+
+    if (allShapes) {
+      let shape;
+      let instruction = nextProps.toUpdate.instruction;
+
+      allShapes.forEach(function(shapeData) {
+        let id = shapeData.id;
+        if(id>-1){
+          let child = self.stage.getChildAt(id);
+
+          if (!child) {
+            shape = new Shape();
+            self.stage.addChildAt(shape, id);
+          }
+          if (instruction == 'remove') {
+            self.stage.removeChild(shape);
+          }
+          else {
+            for (var prop in shapeData) {
+              if (shapeData.hasOwnProperty(prop)) {
+                if (shapeData[prop]) {
+                  if (prop == 'bounds') {
+                    let bounds = shapeData.getBounds();
+                    shape.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+                    console.log(bounds);
+                  } else {
+                    shape[prop] = shapeData[prop];
+                    console.log(prop,shapeData[prop], shape);
+                  }
+                }
+              }
+            }
+          }
+          console.log(shape);
+        }
+
+      });
+      self.stage.update();
+    }
+  }
 
   componentDidMount () {
 
@@ -44,25 +106,25 @@ class Canvas extends React.Component {
         self.processes.mousedown = true;
 
         startPoint = {
-          x:e.offsetX,
-          y:e.offsetY
+          x: e.offsetX,
+          y: e.offsetY
         };
 
         // verifying if there is a selection container.
         selector = self.stage.getChildByName('selection');
 
-        if(selector){
-          if(isInsideRegion({x:startPoint.x, y:startPoint.y})){
+        if (selector) {
+          if (isInsideRegion({x: startPoint.x, y: startPoint.y})) {
             self.processes.movingSelection = true;
-          }else{
+          } else {
             selectedShapes = [];
             self.stage.removeChild(selector);
 
-            self.broadcast(selector,'remove');
+            self.broadcast(selector, 'remove');
             self.stage.update();
 
           }
-        }else{
+        } else {
           shape = new Shape();
           shape.x = startPoint.x;
           shape.y = startPoint.y;
@@ -89,9 +151,9 @@ class Canvas extends React.Component {
             shape.name = 'selection';
             shape.graphics.clear();
 
-            shape.graphics.beginStroke('black')
-                .setStrokeDash([10, 2,], 0)
-                .drawRect(0, 0, distance.x, distance.y);
+            shape.graphics.beginStroke('black').setStrokeDash([
+              10, 2,
+            ], 0).drawRect(0, 0, distance.x, distance.y);
 
             shape.width = distance.x;
             shape.height = distance.y;
@@ -103,16 +165,16 @@ class Canvas extends React.Component {
               y: (shape.y + distance.y)
             });
 
-          }else if (self.processes.movingSelection){
-            if(selectedShapes.length>0){
+          } else if (self.processes.movingSelection) {
+            if (selectedShapes.length > 0) {
 
               let allShapes = [].concat(selectedShapes, selector);
 
-              allShapes.forEach(function(shape){
+              allShapes.forEach(function(shape) {
                 shape.x += distance.x;
                 shape.y += distance.y;
 
-                shape.points.forEach(function(point){
+                shape.points.forEach(function(point) {
                   point.x += distance.x;
                   point.y += distance.y;
                 });
@@ -121,16 +183,15 @@ class Canvas extends React.Component {
               });
 
               startPoint = {
-                x:e.offsetX,
-                y:e.offsetY
+                x: e.offsetX,
+                y: e.offsetY
               };
 
-              self.broadcast(shape);
+              self.broadcast(allShapes);
               self.stage.update();
             }
 
-          }
-          else {
+          } else {
             self.cancelSelection();
             self.processes.drawing = true;
 
@@ -138,14 +199,11 @@ class Canvas extends React.Component {
               shape.name = 'stroke';
               shape.graphics.beginStroke('red').moveTo(0, 0);
               self.processes.drawingStarted = true;
-            }
-            else {
-              shape.graphics.lineTo(distance.x, distance.y);
+            } else {shape.graphics.lineTo(distance.x, distance.y);
               shape.points.push({
                 x: (distance.x + shape.x),
                 y: (distance.y + shape.y)
-              });
-            }
+              });}
 
           }
           self.broadcast(shape);
@@ -155,9 +213,9 @@ class Canvas extends React.Component {
       mouseup: function() {
         self.restartProcesses();
 
-        if(shape.points.length>1){
-          shape.setAABB();
-        }
+        if (shape.points.length > 1) {shape.setAABB();
+          self.broadcast(shape);
+          self.stage.update();}
 
         let region = shape.getBounds();
         if (shape.name == 'selection') {
@@ -201,12 +259,11 @@ class Canvas extends React.Component {
       }
     });
 
-
     function isInsideRegion(point) {
 
       var pointIsInside = false;
 
-      if(selectionRegion){
+      if (selectionRegion) {
         let pointXIsInside = (selectionRegion.start.x < point.x) && (point.x < selectionRegion.end.x);
         let pointYIsInside = (selectionRegion.start.y < point.y) && (point.y < selectionRegion.end.y);
 
