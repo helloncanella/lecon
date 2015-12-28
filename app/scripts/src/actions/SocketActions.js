@@ -7,13 +7,13 @@ var SocketActions = {
   broadcast: function(shapes, instruction) {
     let action = {
       type: Constants.BROADCAST,
-      data: _.assign({}, {
+      data: {
         socketEvent: 'shape update',
         data: {
           shapes: shapes,
           instruction: instruction
         }
-      })
+      }
     };
     AppDispatcher.handleAction(action);
   }

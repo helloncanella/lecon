@@ -7,10 +7,10 @@ var CanvasAction = {
   updateStage: function(data) {
     let action = {
       type: Constants.UPDATE_STAGE,
-      data: _.assign({}, {
+      data: {
         shapes: data.shapes,
         instruction: data.instruction
-      })
+      }
     };
     AppDispatcher.handleAction(action);
   }

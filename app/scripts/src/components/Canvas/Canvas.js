@@ -1,6 +1,7 @@
 import React from 'react';
 import Shape from './auxiliar/Shape';
 import SocketActions from '../../actions/SocketActions';
+import _ from 'lodash';
 
 var self,
   selection,
@@ -37,14 +38,19 @@ class Canvas extends React.Component {
 
     let toBroadcast = [];
 
+    let teste;
+
     if (!(shapes instanceof Array)) {
       shapes = [shapes];
     }
 
     shapes.forEach(function(shape) {
-      console.log(self.stage.getChildIndex(shape));
-      toBroadcast.push({name: shape.name, id: self.stage.getChildIndex(shape), graphics: shape.graphics, bounds: shape.getBounds(), points: shape.points, x: shape.x, y: shape.y});
+      teste = {name: shape.name, id: self.stage.getChildIndex(shape), graphics: shape.graphics, bounds: shape.getBounds(), points: shape.points, x: shape.x, y: shape.y};
+      console.log(teste.graphics);
+      toBroadcast.push(teste);
     });
+
+
 
     SocketActions.broadcast(toBroadcast, instruction);
 
@@ -53,43 +59,42 @@ class Canvas extends React.Component {
   componentWillReceiveProps (nextProps) {
     let allShapes = nextProps.toUpdate.shapes;
 
-    console.log(allShapes);
 
     if (allShapes) {
-      let shape;
       let instruction = nextProps.toUpdate.instruction;
 
       allShapes.forEach(function(shapeData) {
         let id = shapeData.id;
-        if(id>-1){
+        let shape;
+
+
+        if (id > -1) {
           let child = self.stage.getChildAt(id);
 
           if (!child) {
             shape = new Shape();
-            self.stage.addChildAt(shape, id);
+            self.stage.addChildAt(shape,id);
+          }else{
+            shape = child;
           }
-          if (instruction == 'remove') {
-            self.stage.removeChild(shape);
-          }
+
+          if (instruction == 'remove') {self.stage.removeChild(shape);}
           else {
             for (var prop in shapeData) {
               if (shapeData.hasOwnProperty(prop)) {
                 if (shapeData[prop]) {
                   if (prop == 'bounds') {
-                    let bounds = shapeData.getBounds();
+                    let bounds = shapeData.bounds;
                     shape.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
-                    console.log(bounds);
                   } else {
                     shape[prop] = shapeData[prop];
-                    console.log(prop,shapeData[prop], shape);
                   }
                 }
               }
             }
           }
-          console.log(shape);
         }
-
+        console.log(shape);
       });
       self.stage.update();
     }
@@ -165,6 +170,8 @@ class Canvas extends React.Component {
               y: (shape.y + distance.y)
             });
 
+            console.log(shape.graphics);
+
           } else if (self.processes.movingSelection) {
             if (selectedShapes.length > 0) {
 
@@ -180,6 +187,7 @@ class Canvas extends React.Component {
                 });
 
                 shape.setAABB();
+
               });
 
               startPoint = {
@@ -189,6 +197,8 @@ class Canvas extends React.Component {
 
               self.broadcast(allShapes);
               self.stage.update();
+
+
             }
 
           } else {
