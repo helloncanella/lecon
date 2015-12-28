@@ -179,7 +179,7 @@ class Canvas extends React.Component {
 
           selection = setTimeout(function() {
             self.processes.selecting = true;
-          }, 2000);
+          }, 10000);
         }
 
       },
