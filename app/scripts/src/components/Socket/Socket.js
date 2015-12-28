@@ -16,4 +16,8 @@ socketClient.on('shape', function(data){
   CanvasActions.updateStage(data);
 });
 
+socketClient.on('mico', function(data){
+  console.log(data);
+});
+
 SocketStore.addChangeListener(Socket.change);

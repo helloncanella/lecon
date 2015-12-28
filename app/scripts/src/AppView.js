@@ -35,7 +35,7 @@ class AppView extends React.Component {
     let toUpdate = this.state.toUpdate || '';
 
     return(
-      <Canvas toUpdate={toUpdate} id={'canvas'} width={$(window).width()} height={$(window).height()}/>
+      <Canvas toUpdate={toUpdate} id={'canvas'} width={3000} height={3000}/>
     );
   }
 

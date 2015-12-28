@@ -12,6 +12,8 @@ app.get('/', function(req, res) {
 });
 
 io.on('connection', function(socket) {
+  socket.broadcast.emit('mico', 'ola');
+
   socket.on('shape update', function(data) {
     socket.broadcast.emit('shape', data);
   });

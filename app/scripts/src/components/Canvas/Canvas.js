@@ -8,6 +8,7 @@ import _ from 'lodash';
 var self,
   selection,
   selectionRegion,
+  selectorID,
   selectedShapes = [],
   startPoint,
   commandFactory,
@@ -67,6 +68,8 @@ class Canvas extends React.Component {
 
   componentWillReceiveProps (nextProps) {
 
+    self.stage.update();
+
     let shape, decorator;
     let allShapes = nextProps.toUpdate.shapes;
 
@@ -76,10 +79,18 @@ class Canvas extends React.Component {
       allShapes.forEach(function(shapeData) {
 
         let id = shapeData.id;
+        let child = self.stage.getChildAt(id);
 
-        if (id > -1) {
-          let child = self.stage.getChildAt(id);
+        if(shapeData.name == 'selection'){
+          selectorID = id;
+        }
 
+        if (instruction == 'remove') {
+          console.log('aqui');
+          console.log(selectorID);
+          let selector = self.stage.getChildAt(selectorID);
+          self.stage.removeChild(selector);
+        }else{
           if (!child) {
             shape = new Shape();
             shape.artist = new Decorator(shape.graphics);
@@ -87,8 +98,8 @@ class Canvas extends React.Component {
           } else {
             shape = child;
           }
-
-          if (instruction == 'remove') {self.stage.removeChild(shape);}
+          if (instruction == 'remove') {
+          }
           else {
             for (var prop in shapeData) {
               if (shapeData.hasOwnProperty(prop)) {
@@ -98,9 +109,11 @@ class Canvas extends React.Component {
                     shape.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
                   }
                   else if (prop == 'commands') {
+                    if(shape.name=='selection'){
+                      shape.graphics.clear();
+                    }
                     var commands = shapeData.commands;
                     commands.forEach(decorateShape);
-                    console.log(shape.graphics);
                   }
                   else{
                     shape[prop] = shapeData[prop];
@@ -116,6 +129,7 @@ class Canvas extends React.Component {
     self.stage.update();
 
     function decorateShape(command) {
+
       shape.artist.decorate(command);
     }
 
@@ -261,8 +275,6 @@ class Canvas extends React.Component {
             else {
               let lineTo = shape.graphics.lineTo(distance.x, distance.y).command;
               shape.commands.push({'lineTo': lineTo});
-
-              console.log(shape.graphics);
 
               shape.points.push({
                 x: (distance.x + shape.x),
