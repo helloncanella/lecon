@@ -1,6 +1,8 @@
 import React from 'react';
-import Shape from './auxiliar/Shape';
 import SocketActions from '../../actions/SocketActions';
+
+import Shape from './auxiliar/Shape';
+import Decorator from './auxiliar/Decorator';
 import _ from 'lodash';
 
 var self,
@@ -8,6 +10,7 @@ var self,
   selectionRegion,
   selectedShapes = [],
   startPoint,
+  commandFactory,
   selector;
 
 class Canvas extends React.Component {
@@ -38,43 +41,50 @@ class Canvas extends React.Component {
 
     let toBroadcast = [];
 
-    let teste;
+    let shapeData;
 
     if (!(shapes instanceof Array)) {
       shapes = [shapes];
     }
 
     shapes.forEach(function(shape) {
-      teste = {name: shape.name, id: self.stage.getChildIndex(shape), graphics: shape.graphics, bounds: shape.getBounds(), points: shape.points, x: shape.x, y: shape.y};
-      console.log(teste.graphics);
-      toBroadcast.push(teste);
+      shapeData = {
+        name: shape.name,
+        id: self.stage.getChildIndex(shape),
+        bounds: shape.getBounds(),
+        points: shape.points,
+        x: shape.x,
+        y: shape.y,
+        commands: shape.commands
+      };
+
+      toBroadcast.push(shapeData);
     });
-
-
 
     SocketActions.broadcast(toBroadcast, instruction);
 
   }
 
   componentWillReceiveProps (nextProps) {
-    let allShapes = nextProps.toUpdate.shapes;
 
+    let shape, decorator;
+    let allShapes = nextProps.toUpdate.shapes;
 
     if (allShapes) {
       let instruction = nextProps.toUpdate.instruction;
 
       allShapes.forEach(function(shapeData) {
-        let id = shapeData.id;
-        let shape;
 
+        let id = shapeData.id;
 
         if (id > -1) {
           let child = self.stage.getChildAt(id);
 
           if (!child) {
             shape = new Shape();
-            self.stage.addChildAt(shape,id);
-          }else{
+            shape.artist = new Decorator(shape.graphics);
+            self.stage.addChildAt(shape, id);
+          } else {
             shape = child;
           }
 
@@ -86,7 +96,13 @@ class Canvas extends React.Component {
                   if (prop == 'bounds') {
                     let bounds = shapeData.bounds;
                     shape.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
-                  } else {
+                  }
+                  else if (prop == 'commands') {
+                    var commands = shapeData.commands;
+                    commands.forEach(decorateShape);
+                    console.log(shape.graphics);
+                  }
+                  else{
                     shape[prop] = shapeData[prop];
                   }
                 }
@@ -94,15 +110,19 @@ class Canvas extends React.Component {
             }
           }
         }
-        console.log(shape);
       });
-      self.stage.update();
     }
+
+    self.stage.update();
+
+    function decorateShape(command) {
+      shape.artist.decorate(command);
+    }
+
   }
 
   componentDidMount () {
-
-    let shape;
+    let shape, g;
 
     this.stage = new createjs.Stage(this.props.id);
 
@@ -130,10 +150,14 @@ class Canvas extends React.Component {
 
           }
         } else {
+
+
           shape = new Shape();
           shape.x = startPoint.x;
           shape.y = startPoint.y;
           shape.points = [];
+
+          g = shape.graphics;
 
           self.stage.addChild(shape);
 
@@ -146,7 +170,11 @@ class Canvas extends React.Component {
 
       },
       mousemove: function(e) {
+
+
         if (self.processes.mousedown) {
+          shape.commands = [];
+
           let distance = {
             x: e.offsetX - startPoint.x,
             y: e.offsetY - startPoint.y
@@ -154,11 +182,21 @@ class Canvas extends React.Component {
 
           if (self.processes.selecting) {
             shape.name = 'selection';
-            shape.graphics.clear();
+            g.clear();
 
-            shape.graphics.beginStroke('black').setStrokeDash([
-              10, 2,
-            ], 0).drawRect(0, 0, distance.x, distance.y);
+            let beginStroke = g.beginStroke('black').command;
+            let setStrokeDash = g.setStrokeDash([10, 2], 0).command;
+            let drawRect = g.drawRect(0, 0, distance.x, distance.y).command;
+
+            /*
+              The commands is labeled because the name of the prototype's functions
+              lost in the sockets
+            */
+            shape.commands.push(
+              {'beginStroke': beginStroke},
+              {'setStrokeDash': setStrokeDash},
+              {'drawRect': drawRect}
+            );
 
             shape.width = distance.x;
             shape.height = distance.y;
@@ -169,8 +207,6 @@ class Canvas extends React.Component {
               x: (shape.x + distance.x),
               y: (shape.y + distance.y)
             });
-
-            console.log(shape.graphics);
 
           } else if (self.processes.movingSelection) {
             if (selectedShapes.length > 0) {
@@ -198,7 +234,6 @@ class Canvas extends React.Component {
               self.broadcast(allShapes);
               self.stage.update();
 
-
             }
 
           } else {
@@ -207,13 +242,33 @@ class Canvas extends React.Component {
 
             if (!self.processes.drawingStarted) {
               shape.name = 'stroke';
-              shape.graphics.beginStroke('red').moveTo(0, 0);
+
+              let beginStroke = g.beginStroke('red').command;
+              let moveTo = g.moveTo(0, 0).command;
+
+              /*
+                The commands is labeled because the name of the prototype's functions
+                lost in the sockets
+              */
+              shape.commands.push(
+                {'moveTo': moveTo},
+                {'beginStroke': beginStroke}
+              );
+
               self.processes.drawingStarted = true;
-            } else {shape.graphics.lineTo(distance.x, distance.y);
+            }
+
+            else {
+              let lineTo = shape.graphics.lineTo(distance.x, distance.y).command;
+              shape.commands.push({'lineTo': lineTo});
+
+              console.log(shape.graphics);
+
               shape.points.push({
                 x: (distance.x + shape.x),
                 y: (distance.y + shape.y)
-              });}
+              });
+            }
 
           }
           self.broadcast(shape);
