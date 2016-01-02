@@ -13,7 +13,21 @@ var CanvasAction = {
       }
     };
     AppDispatcher.handleAction(action);
-  }
+  },
+  changePencilSize: function(size){
+    let action = {
+      type: Constants.CHANGE_PENCIL_SIZE,
+      size: size  
+    }
+    AppDispatcher.handleAction(action); 
+  },
+  changePencilColor: function(color){
+    let action = {
+      type:Constants.CHANGE_PENCIL_COLOR,
+      color: color  
+    }
+    AppDispatcher.handleAction(action); 
+  },
 };
 
 export default CanvasAction;

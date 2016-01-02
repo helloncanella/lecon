@@ -86,8 +86,6 @@ class Canvas extends React.Component {
         }
 
         if (instruction == 'remove') {
-          console.log('aqui');
-          console.log(selectorID);
           let selector = self.stage.getChildAt(selectorID);
           self.stage.removeChild(selector);
         }else{
@@ -164,7 +162,6 @@ class Canvas extends React.Component {
 
           }
         } else {
-
 
           shape = new Shape();
           shape.x = startPoint.x;
@@ -257,7 +254,7 @@ class Canvas extends React.Component {
             if (!self.processes.drawingStarted) {
               shape.name = 'stroke';
 
-              let beginStroke = g.beginStroke('red').command;
+              let beginStroke = g.beginStroke(self.props.color).command;
               let moveTo = g.moveTo(0, 0).command;
 
               /*
