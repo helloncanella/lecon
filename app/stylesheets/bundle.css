@@ -15,7 +15,9 @@
   width: 500px;
   padding: 20px; }
   #PencilCase h4 {
-    margin: 0; }
+    margin: 0;
+    margin-bottom: 2px;
+    font-size: 0.9em; }
   #PencilCase span {
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -29,6 +31,11 @@
       flex-direction: column; }
     #PencilCase span.color {
       font-size: 2em; }
+    #PencilCase span.eraser {
+      font-size: 30px; }
+    #PencilCase span input {
+      text-align: center;
+      width: 90px; }
 
 body {
   margin: 0;

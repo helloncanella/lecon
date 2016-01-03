@@ -11,6 +11,8 @@
   
   h4{
     margin:0;
+    margin-bottom:2px;
+    font-size: 0.9em;
   }
   
   span{  
@@ -25,9 +27,13 @@
       font-size:2em;
     }
     
+    &.eraser{
+      font-size:30px;
+    }
+    
+    input{
+      text-align: center;
+      width:90px;
+    }
   }
-  
-  
-
-  
 }
