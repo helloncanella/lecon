@@ -7,6 +7,7 @@ class Decorator {
   }
 
   decorate(command) {
+    console.log(command);
     for (var label in command) {
       switch (label) {
         case 'beginStroke':
@@ -21,11 +22,14 @@ class Decorator {
         case 'moveTo':
           this.g.moveTo(command[label].x, command[label].y);
           break;
+        case 'setStroke':
+          this.g.setStrokeStyle(command[label].width, command[label].caps); 
+          break;
         case 'lineTo':
           this.g.lineTo(command[label].x, command[label].y);
           break;
         default:
-          console.log('not curated: ', label);
+          console.error('not curated: ', label);
           break;
       }
     }

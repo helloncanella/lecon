@@ -12,7 +12,8 @@ var self,
   selectedShapes = [],
   startPoint,
   commandFactory,
-  selector;
+  selector, 
+  old = {};
 
 class Canvas extends React.Component {
 
@@ -30,6 +31,8 @@ class Canvas extends React.Component {
       drawingStarted: false,
       movingSelection: false
     };
+    
+    old = {};
   }
 
   cancelSelection () {
@@ -176,13 +179,12 @@ class Canvas extends React.Component {
 
           selection = setTimeout(function() {
             self.processes.selecting = true;
-          }, 10000);
+          }, 500);
         }
 
       },
       mousemove: function(e) {
-
-
+        
         if (self.processes.mousedown) {
           shape.commands = [];
 
@@ -253,30 +255,37 @@ class Canvas extends React.Component {
 
             if (!self.processes.drawingStarted) {
               shape.name = 'stroke';
-
-              let beginStroke = g.beginStroke(self.props.color).command;
-              let moveTo = g.moveTo(0, 0).command;
-
-              /*
-                The commands is labeled because the name of the prototype's functions
-                lost in the sockets
-              */
-              shape.commands.push(
-                {'moveTo': moveTo},
-                {'beginStroke': beginStroke}
-              );
-
               self.processes.drawingStarted = true;
             }
-
             else {
-              let lineTo = shape.graphics.lineTo(distance.x, distance.y).command;
-              shape.commands.push({'lineTo': lineTo});
 
-              shape.points.push({
-                x: (distance.x + shape.x),
-                y: (distance.y + shape.y)
-              });
+              if(old.x){
+                let beginStroke = g.beginStroke(self.props.color).command;
+                let setStroke = g.setStrokeStyle(self.props.size, "round").command;
+                let moveTo = g.moveTo(old.x, old.y).command;
+                let lineTo = shape.graphics.lineTo(distance.x, distance.y).command;
+
+                /*
+                  The commands is labeled because the name of the prototype's functions
+                  lost in the sockets
+                */
+                shape.commands.push(
+                  {'beginStroke': beginStroke},
+                  {'setStroke':setStroke},
+                  {'moveTo': moveTo},
+                  {'lineTo': lineTo}
+                );  
+              
+                shape.points.push({
+                  x: (distance.x + shape.x),
+                  y: (distance.y + shape.y)
+                });
+                
+              }
+              
+              old.x = distance.x;
+              old.y = distance.y;
+
             }
 
           }
