@@ -1,3 +1,35 @@
+#PencilCase {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-justify-content: space-around;
+  -ms-flex-pack: distribute;
+  justify-content: space-around;
+  width: 500px;
+  padding: 20px; }
+  #PencilCase h4 {
+    margin: 0; }
+  #PencilCase span {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center; }
+    #PencilCase span.size {
+      -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+      flex-direction: column; }
+    #PencilCase span.color {
+      font-size: 2em; }
+
 body {
   margin: 0;
   -webkit-user-select: none;

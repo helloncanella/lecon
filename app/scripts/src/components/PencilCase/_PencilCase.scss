@@ -1,0 +1,33 @@
+#PencilCase{
+  display: flex;
+  position: absolute;
+  right: 0; 
+  bottom: 0; 
+  z-index: 10;
+  align-items: center;
+  justify-content: space-around;
+  width: 500px;
+  padding: 20px;
+  
+  h4{
+    margin:0;
+  }
+  
+  span{  
+    display: flex;    
+    align-items: center;
+  
+    &.size{
+      flex-direction: column;
+    }
+  
+    &.color{
+      font-size:2em;
+    }
+    
+  }
+  
+  
+
+  
+}
