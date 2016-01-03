@@ -10,7 +10,7 @@ function getAppStates (){
   return({
     toUpdate: CanvasStore.getShapesToUpdate(),
     color: CanvasStore.getPencilColor(),
-    size: CanvasStore.getPencilSize, 
+    size: CanvasStore.getPencilSize(), 
   });
 }
 
@@ -42,6 +42,7 @@ class AppView extends React.Component {
     return( 
       <div>
         <PencilCase />
+        <Canvas color={color} size={size} toUpdate={toUpdate} id={'canvas'} width={3000} height={3000}/>
       </div>
     );
   }
