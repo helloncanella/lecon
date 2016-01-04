@@ -3,15 +3,14 @@ import SocketActions from '../../actions/SocketActions';
 
 import Shape from './auxiliar/Shape';
 import Decorator from './auxiliar/Decorator';
+import Stage from './auxiliar/Stage';
 import _ from 'lodash';
 
 var self,
   selection,
   selectionRegion,
-  selectorID,
   selectedShapes = [],
   startPoint,
-  commandFactory,
   selector, 
   old = {};
 
@@ -73,24 +72,21 @@ class Canvas extends React.Component {
 
     self.stage.update();
 
-    let shape, decorator;
+    let shape;
     let allShapes = nextProps.toUpdate.shapes;
 
     if (allShapes) {
       let instruction = nextProps.toUpdate.instruction;
-
+      
       allShapes.forEach(function(shapeData) {
 
         let id = shapeData.id;
         let child = self.stage.getChildAt(id);
 
-        if(shapeData.name == 'selection'){
-          selectorID = id;
-        }
-
         if (instruction == 'remove') {
-          let selector = self.stage.getChildAt(selectorID);
-          self.stage.removeChild(selector);
+          if(child){
+            self.stage.removeChild(child);
+          }
         }else{
           if (!child) {
             shape = new Shape();
@@ -99,26 +95,23 @@ class Canvas extends React.Component {
           } else {
             shape = child;
           }
-          if (instruction == 'remove') {
-          }
-          else {
-            for (var prop in shapeData) {
-              if (shapeData.hasOwnProperty(prop)) {
-                if (shapeData[prop]) {
-                  if (prop == 'bounds') {
-                    let bounds = shapeData.bounds;
-                    shape.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+         
+          for (var prop in shapeData) {
+            if (shapeData.hasOwnProperty(prop)) {
+              if (shapeData[prop]) {
+                if (prop == 'bounds') {
+                  let bounds = shapeData.bounds;
+                  shape.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+                }
+                else if (prop == 'commands') {
+                  if(shape.name=='selection'){
+                    shape.graphics.clear();
                   }
-                  else if (prop == 'commands') {
-                    if(shape.name=='selection'){
-                      shape.graphics.clear();
-                    }
-                    var commands = shapeData.commands;
-                    commands.forEach(decorateShape);
-                  }
-                  else{
-                    shape[prop] = shapeData[prop];
-                  }
+                  var commands = shapeData.commands;
+                  commands.forEach(decorateShape);
+                }
+                else{
+                  shape[prop] = shapeData[prop];
                 }
               }
             }
@@ -139,7 +132,7 @@ class Canvas extends React.Component {
   componentDidMount () {
     let shape, g;
 
-    this.stage = new createjs.Stage(this.props.id);
+    this.stage = new Stage(this.props.id);
 
     $('canvas#' + this.props.id).on({
       mousedown: function(e) {
@@ -158,11 +151,11 @@ class Canvas extends React.Component {
             self.processes.movingSelection = true;
           } else {
             selectedShapes = [];
-            self.stage.removeChild(selector);
-
+            
+            //  
             self.broadcast(selector, 'remove');
+            self.stage.removeChild(selector);
             self.stage.update();
-
           }
         } else {
 
@@ -296,7 +289,8 @@ class Canvas extends React.Component {
       mouseup: function() {
         self.restartProcesses();
 
-        if (shape.points.length > 1) {shape.setAABB();
+        if (shape.points.length > 1) {
+          shape.setAABB();
           self.broadcast(shape);
           self.stage.update();}
 
