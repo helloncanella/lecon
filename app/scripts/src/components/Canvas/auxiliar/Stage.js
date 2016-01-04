@@ -1,12 +1,21 @@
+var self;
+
 class Stage extends createjs.Stage {
   
   constructor(props){
     super(props);
-    this.log = new Map();
+    this.log = [];
+    self = this;
   };
   
   registerLog(){
-    this.log.set(Date.now(),this.children);
+    var data = {
+      timeStamp: Date.now(),
+      children: self.children
+    };
+    this.log.push(data);
+    
+    console.log(this.log);
   };
   
   update() {

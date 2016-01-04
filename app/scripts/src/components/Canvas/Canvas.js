@@ -4,12 +4,12 @@ import SocketActions from '../../actions/SocketActions';
 import Shape from './auxiliar/Shape';
 import Decorator from './auxiliar/Decorator';
 import Stage from './auxiliar/Stage';
+import Controller from './auxiliar/Controller';
 import _ from 'lodash';
 
 var self,
   selection,
   selectionRegion,
-  selectedShapes = [],
   startPoint,
   selector, 
   old = {};
@@ -20,6 +20,7 @@ class Canvas extends React.Component {
     super(props);
     self = this;
     this.restartProcesses();
+   
   }
 
   restartProcesses () {
@@ -131,8 +132,12 @@ class Canvas extends React.Component {
 
   componentDidMount () {
     let shape, g;
+    
 
     this.stage = new Stage(this.props.id);
+    
+    /*activing keyController*/
+    Controller.activate(this.stage);
 
     $('canvas#' + this.props.id).on({
       mousedown: function(e) {
@@ -150,7 +155,7 @@ class Canvas extends React.Component {
           if (isInsideRegion({x: startPoint.x, y: startPoint.y})) {
             self.processes.movingSelection = true;
           } else {
-            selectedShapes = [];
+            self.stage.selectedShapes = [];
             
             //  
             self.broadcast(selector, 'remove');
@@ -172,7 +177,7 @@ class Canvas extends React.Component {
 
           selection = setTimeout(function() {
             self.processes.selecting = true;
-          }, 500);
+          }, 175);
         }
 
       },
@@ -215,9 +220,9 @@ class Canvas extends React.Component {
             });
 
           } else if (self.processes.movingSelection) {
-            if (selectedShapes.length > 0) {
+            if (self.stage.selectedShapes.length > 0) {
 
-              let allShapes = [].concat(selectedShapes, selector);
+              let allShapes = [].concat(self.stage.selectedShapes, selector);
 
               allShapes.forEach(function(shape) {
                 shape.x += distance.x;
@@ -298,7 +303,7 @@ class Canvas extends React.Component {
         if (shape.name == 'selection') {
           let region = shape.getBounds();
           let children = self.stage.children;
-          selectedShapes = [];
+          self.stage.selectedShapes = [];
 
           selectionRegion = {
             start: {
@@ -314,21 +319,24 @@ class Canvas extends React.Component {
           children.forEach(function(child) {
             if (child.name !== 'selection') {
               let bounds = child.getBounds();
-              let childStart = {
-                x: bounds.x,
-                y: bounds.y
-              };
-              let childEnd = {
-                x: (bounds.x + bounds.width),
-                y: (bounds.y + bounds.height)
-              };
-
-              let childStartIsInside = isInsideRegion(childStart);
-              let childEndIsInside = isInsideRegion(childEnd);
-
-              let childIsInside = childStartIsInside && childEndIsInside;
-
-              if (childIsInside) {selectedShapes.push(child);}
+              if(bounds){
+                let childStart = {
+                  x: bounds.x,
+                  y: bounds.y
+                };
+                let childEnd = {
+                  x: (bounds.x + bounds.width),
+                  y: (bounds.y + bounds.height)
+                };
+  
+                let childStartIsInside = isInsideRegion(childStart);
+                let childEndIsInside = isInsideRegion(childEnd);
+  
+                let childIsInside = childStartIsInside && childEndIsInside;
+  
+                if (childIsInside) {self.stage.selectedShapes.push(child);}
+                  
+              }
             }
           });
 
