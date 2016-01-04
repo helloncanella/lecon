@@ -1,8 +1,8 @@
 import React from 'react';
 import Shape from './auxiliar/Shape';
 import Decorator from './auxiliar/Decorator';
-// import Stage from './auxiliar/Stage';
-// import Controller from './auxiliar/Controller';
+import Stage from './auxiliar/Stage';
+import Controller from './auxiliar/Controller';
 import PostOffice from './auxiliar/PostOffice';
 import _ from 'lodash';
 
@@ -20,7 +20,6 @@ class Canvas extends React.Component {
     super(props);
     self = this;
     this.restartProcesses();
-   
   }
 
   restartProcesses () {
@@ -97,9 +96,7 @@ class Canvas extends React.Component {
     self.stage.update();
 
     function decorateShape(command) {
-
       shape.artist.decorate(command);
-      console.log(shape, shape.graphics);
     }
 
   }
@@ -107,12 +104,14 @@ class Canvas extends React.Component {
   componentDidMount () {
     let shape, g;
     
-
-    this.stage = new createjs.Stage(this.props.id);
+    this.stage = new Stage(this.props.id);
+    
+    var postOffice = new PostOffice(this.stage);
+    
     
     /*activing keyController*/
-    // var controller = new Controller(this.stage);
-    // controller.activate(); 
+    var controller = new Controller(this.stage);
+    controller.activate(); 
 
     $('canvas#' + this.props.id).on({
       mousedown: function(e) {
@@ -133,7 +132,7 @@ class Canvas extends React.Component {
             self.stage.selectedShapes = [];
             
             //  
-            PostOffice.dispatch(selector, 'remove');
+            postOffice.dispatch(selector, 'remove');
             self.stage.removeChild(selector);
             self.stage.update();
           }
@@ -217,7 +216,7 @@ class Canvas extends React.Component {
                 y: e.offsetY
               };
 
-              PostOffice.dispatch(allShapes);
+              postOffice.dispatch(allShapes);
               self.stage.update();
 
             }
@@ -262,7 +261,7 @@ class Canvas extends React.Component {
             }
 
           }
-          PostOffice.dispatch(shape);
+          postOffice.dispatch(shape);
           self.stage.update();
         }
       },
@@ -271,7 +270,7 @@ class Canvas extends React.Component {
 
         if (shape.points.length > 1) {
           shape.setAABB();
-          PostOffice.dispatch(shape);
+          postOffice.dispatch(shape);
           self.stage.update();}
 
         let region = shape.getBounds();

@@ -1,44 +1,43 @@
 import SocketActions from '../../../actions/SocketActions';
 
-var PostOffice = {
+var self;
+
+class PostOffice {
   
-  packShapes: function (shapes){
-    
-    let toBroadcast = [];
-
-    let shapeData;
-
-    if (!(shapes instanceof Array)) {
-      shapes = [shapes];
-    }
-
-    shapes.forEach(function(shape) {
-      console.log(shape.graphics);
-      shapeData = {
-        name: shape.name,
-        id: shape.id,
-        bounds: shape.getBounds(),
-        points: shape.points,
-        x: shape.x,
-        y: shape.y,
-        commands: shape.commands
-      };
-
-      toBroadcast.push(shapeData);
-    });
-    
-    
-    
-    return toBroadcast; 
-  },
+  constructor(stage){
+    this.stage = stage;
+    self = this;
+  }
   
-  dispatch: function(shapes, instruction) {
+  dispatch(shapes, instruction){
     
-    let toBroadcast = this.packShapes(shapes);
-
+    let toBroadcast = [];		
+ 		
+    let shapeData;		
+    
+    if (!(shapes instanceof Array)) {		
+     shapes = [shapes];		
+    }		
+    
+    shapes.forEach(function(shape) {		
+     shapeData = {		
+       name: shape.name,		
+       id: self.stage.getChildIndex(shape),		
+       bounds: shape.getBounds(),		
+       points: shape.points,		
+       x: shape.x,		
+       y: shape.y,		
+       commands: shape.commands		
+     };		
+    
+     toBroadcast.push(shapeData);		
+    });		
+    
     SocketActions.broadcast(toBroadcast, instruction);
-
-  },
+  }
 }
+
+
+
 
 export default PostOffice; 
