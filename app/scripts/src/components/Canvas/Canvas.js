@@ -1,10 +1,9 @@
 import React from 'react';
-import SocketActions from '../../actions/SocketActions';
-
 import Shape from './auxiliar/Shape';
 import Decorator from './auxiliar/Decorator';
-import Stage from './auxiliar/Stage';
-import Controller from './auxiliar/Controller';
+// import Stage from './auxiliar/Stage';
+// import Controller from './auxiliar/Controller';
+import PostOffice from './auxiliar/PostOffice';
 import _ from 'lodash';
 
 var self,
@@ -13,10 +12,11 @@ var self,
   startPoint,
   selector, 
   old = {};
+  
 
 class Canvas extends React.Component {
 
-  constructor(props) {
+  constructor(props) { 
     super(props);
     self = this;
     this.restartProcesses();
@@ -40,34 +40,7 @@ class Canvas extends React.Component {
     self.processes.selecting = false;
     self.processes.drawing = true;
   }
-
-  broadcast (shapes, instruction) {
-
-    let toBroadcast = [];
-
-    let shapeData;
-
-    if (!(shapes instanceof Array)) {
-      shapes = [shapes];
-    }
-
-    shapes.forEach(function(shape) {
-      shapeData = {
-        name: shape.name,
-        id: self.stage.getChildIndex(shape),
-        bounds: shape.getBounds(),
-        points: shape.points,
-        x: shape.x,
-        y: shape.y,
-        commands: shape.commands
-      };
-
-      toBroadcast.push(shapeData);
-    });
-
-    SocketActions.broadcast(toBroadcast, instruction);
-
-  }
+  
 
   componentWillReceiveProps (nextProps) {
 
@@ -126,6 +99,7 @@ class Canvas extends React.Component {
     function decorateShape(command) {
 
       shape.artist.decorate(command);
+      console.log(shape, shape.graphics);
     }
 
   }
@@ -134,11 +108,11 @@ class Canvas extends React.Component {
     let shape, g;
     
 
-    this.stage = new Stage(this.props.id);
+    this.stage = new createjs.Stage(this.props.id);
     
     /*activing keyController*/
-    var controller = new Controller(this.stage);
-    controller.activate(); 
+    // var controller = new Controller(this.stage);
+    // controller.activate(); 
 
     $('canvas#' + this.props.id).on({
       mousedown: function(e) {
@@ -159,7 +133,7 @@ class Canvas extends React.Component {
             self.stage.selectedShapes = [];
             
             //  
-            self.broadcast(selector, 'remove');
+            PostOffice.dispatch(selector, 'remove');
             self.stage.removeChild(selector);
             self.stage.update();
           }
@@ -243,7 +217,7 @@ class Canvas extends React.Component {
                 y: e.offsetY
               };
 
-              self.broadcast(allShapes);
+              PostOffice.dispatch(allShapes);
               self.stage.update();
 
             }
@@ -288,7 +262,7 @@ class Canvas extends React.Component {
             }
 
           }
-          self.broadcast(shape);
+          PostOffice.dispatch(shape);
           self.stage.update();
         }
       },
@@ -297,7 +271,7 @@ class Canvas extends React.Component {
 
         if (shape.points.length > 1) {
           shape.setAABB();
-          self.broadcast(shape);
+          PostOffice.dispatch(shape);
           self.stage.update();}
 
         let region = shape.getBounds();

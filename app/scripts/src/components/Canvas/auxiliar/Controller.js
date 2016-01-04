@@ -1,4 +1,5 @@
 import SocketActions from '../../../actions/SocketActions';
+import PostOffice from './PostOffice';
 
 var self;
 
@@ -48,11 +49,13 @@ class Controller {
         Remotion's broadcast needs to be called befor state.removeChild.
         Otherwise shapes'id value will be transmitted as -1.  
       */
-      //SocketActions.broadcast(shapes, 'remove');
-
+      
       var selection = self.stage.getChildByName('selection');
+      PostOffice.dispatch(selection, 'remove');
       self.stage.removeChild(selection);
       
+      
+      PostOffice.dispatch(shapes, 'remove');
       shapes.forEach(function(shape){
         self.stage.removeChild(shape);
       });
@@ -61,11 +64,13 @@ class Controller {
     }
     
     function moveBack(){
-      self.stage.removeLastChild();
+      var lastChild = self.stage.removeLastChild();
+      PostOffice.dispatch(lastChild, 'remove');
     }
     
     function moveForward(){
-      self.stage.addLastRemovedChild();
+      var removedLastChild = self.stage.addLastRemovedChild();
+      PostOffice.dispatch(removedLastChild, 'remove');
     }
     
   } 
