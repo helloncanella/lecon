@@ -137,7 +137,8 @@ class Canvas extends React.Component {
     this.stage = new Stage(this.props.id);
     
     /*activing keyController*/
-    Controller.activate(this.stage);
+    var controller = new Controller(this.stage);
+    controller.activate(); 
 
     $('canvas#' + this.props.id).on({
       mousedown: function(e) {
