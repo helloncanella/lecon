@@ -10,7 +10,8 @@ var self,
   selection,
   selectionRegion,
   startPoint,
-  selector, 
+  selector,
+  shape,
   old = {};
   
 
@@ -30,7 +31,7 @@ class Canvas extends React.Component {
       drawingStarted: false,
       movingSelection: false
     };
-    
+    shape = null;
     old = {};
   }
 
@@ -45,7 +46,7 @@ class Canvas extends React.Component {
 
     self.stage.update();
 
-    let shape;
+    
     let data = nextProps.toUpdate.shapes;
 
     if (data) {
@@ -54,11 +55,11 @@ class Canvas extends React.Component {
       
       if (instruction == 'move back') {
         
-        self.stage.removeLastChild();
+        self.controller.moveBack();
       
       } else if (instruction == 'move forward') {
         
-        self.stage.addLastRemovedChild();
+        self.controller.moveForward();
          
       } else {
         
@@ -69,15 +70,19 @@ class Canvas extends React.Component {
           let child = self.stage.getChildAt(index);
   
           if (instruction == 'remove') {
-            if(child){
-              self.stage.removeChildAt(index);
-            }
+            self.stage.children.forEach(function(child){
+              if (child.id == id){
+                self.stage.removeChild(child);  
+                console.log('remove', id, child);
+              }
+            });
           }else{
             if (!child) {
               shape = new Shape();
               shape.artist = new Decorator(shape.graphics);
               shape.id = id;
               self.stage.addChild(shape);
+              console.log(shape.id);
             } else {
               shape = child;
             }
@@ -120,17 +125,17 @@ class Canvas extends React.Component {
   }
 
   componentDidMount () {
-    let shape, g;
+    let g;
     
     this.stage = new Stage(this.props.id);
     
     var postOffice = new PostOffice(this.stage);
     
-    
     /*activing keyController*/
-    var controller = new Controller(this.stage);
-    controller.activate(); 
+    this.controller = new Controller(this.stage);
+    this.controller.activate(); 
 
+    
     $('canvas#' + this.props.id).on({
       mousedown: function(e) {
         self.processes.mousedown = true;
@@ -144,16 +149,19 @@ class Canvas extends React.Component {
         selector = self.stage.getChildByName('selection');
 
         if (selector) {
+          
           if (isInsideRegion({x: startPoint.x, y: startPoint.y})) {
+            shape = selector;  
             self.processes.movingSelection = true;
           } else {
             self.stage.selectedShapes = [];
             
-            //  
+            //removing selector  
             postOffice.dispatch(selector, 'remove');
             self.stage.removeChild(selector);
             self.stage.update();
           }
+          
         } else {
 
           shape = new Shape();
@@ -288,12 +296,14 @@ class Canvas extends React.Component {
         }
       },
       mouseup: function() {
-        self.restartProcesses();
 
-        if (shape.points.length > 1) {
-          shape.setAABB();
-          postOffice.dispatch(shape);
-          self.stage.update();}
+        if(shape){
+          if (shape.points.length > 1) {
+            shape.setAABB();
+            postOffice.dispatch(shape);
+            self.stage.update();
+          }  
+        }
 
         let region = shape.getBounds();
         if (shape.name == 'selection') {
@@ -335,8 +345,9 @@ class Canvas extends React.Component {
               }
             }
           });
-
         }
+        
+        self.restartProcesses();
       }
     });
 

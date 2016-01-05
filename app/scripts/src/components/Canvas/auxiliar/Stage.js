@@ -22,10 +22,8 @@ class Stage extends createjs.Stage {
   };
  
   update() {
-
     super.update();
     this.registerLog();
-
   };
   
   removeLastChild(){
