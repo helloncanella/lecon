@@ -9,6 +9,8 @@ class Controller {
     this.stage = stage;
     this.stepsBack =  0; //liquid result (stepsBack - stepForward) of number of times ctrz-l was called.
     self = this;
+    
+    self.postOffice = new PostOffice(this.stage);
   }
   
   activate(){
@@ -51,11 +53,11 @@ class Controller {
       */
       
       var selection = self.stage.getChildByName('selection');
-      PostOffice.dispatch(selection, 'remove');
+      self.postOffice.dispatch(selection, 'remove');
       self.stage.removeChild(selection);
       
       
-      PostOffice.dispatch(shapes, 'remove');
+      self.postOffice.dispatch(shapes, 'remove');
       shapes.forEach(function(shape){
         self.stage.removeChild(shape);
       });
@@ -65,12 +67,12 @@ class Controller {
     
     function moveBack(){
       var lastChild = self.stage.removeLastChild();
-      PostOffice.dispatch(lastChild, 'remove');
+      self.postOffice.dispatch(lastChild, 'move back');
     }
     
     function moveForward(){
       var removedLastChild = self.stage.addLastRemovedChild();
-      PostOffice.dispatch(removedLastChild, 'remove');
+      self.postOffice.dispatch(removedLastChild, 'move forward');
     }
     
   } 

@@ -7,7 +7,6 @@ class Decorator {
   }
 
   decorate(command) {
-    console.log(this.g);
     for (var label in command) {
       switch (label) {
         case 'beginStroke':
@@ -21,7 +20,6 @@ class Decorator {
           break;
         case 'moveTo':
           this.g.moveTo(command[label].x, command[label].y);
-          console.log(this.g);
           break;
         case 'setStroke':
           this.g.setStrokeStyle(command[label].width, command[label].caps); 

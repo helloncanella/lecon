@@ -22,7 +22,7 @@ class PostOffice {
     shapes.forEach(function(shape) {		
      shapeData = {		
        name: shape.name,		
-       id: self.stage.getChildIndex(shape),		
+       id: shape.id,		
        bounds: shape.getBounds(),		
        points: shape.points,		
        x: shape.x,		

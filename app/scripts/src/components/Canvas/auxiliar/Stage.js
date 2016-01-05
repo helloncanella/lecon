@@ -22,17 +22,20 @@ class Stage extends createjs.Stage {
   };
  
   update() {
+
     super.update();
     this.registerLog();
+
   };
   
   removeLastChild(){
-    var lastChildIndex = this.children.length - 1;
-    this.lastChild =  this.getChildAt(lastChildIndex);
     
-    this.removedChildren.push(this.lastChild);
-    this.removeChild(this.lastChild);
-    this.update();
+    let lastChild = this.getLastChild();
+    
+    this.removedChildren.push(lastChild);
+    this.removeChild(lastChild);
+    
+    super.update();
 
     return this.lastChild;
 
@@ -41,11 +44,19 @@ class Stage extends createjs.Stage {
   addLastRemovedChild(){
     this.lastRemovedChild = this.removedChildren.splice(-1,1)[0]; //Store in order to use it futurally
     this.addChild(this.lastRemovedChild);
-    this.update();
+    super.update();
     
     return this.lastRemovedChild;
     
   };
+  
+  getLastChild() {
+    
+    var index = this.children.length - 1;
+    this.lastChild = this.getChildAt(index);
+    
+    return this.lastChild;
+  }
   
 }
 

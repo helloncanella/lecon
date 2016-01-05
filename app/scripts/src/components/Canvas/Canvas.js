@@ -46,51 +46,69 @@ class Canvas extends React.Component {
     self.stage.update();
 
     let shape;
-    let allShapes = nextProps.toUpdate.shapes;
+    let data = nextProps.toUpdate.shapes;
 
-    if (allShapes) {
+    if (data) {
+      
       let instruction = nextProps.toUpdate.instruction;
       
-      allShapes.forEach(function(shapeData) {
-
-        let id = shapeData.id;
-        let child = self.stage.getChildAt(id);
-
-        if (instruction == 'remove') {
-          if(child){
-            self.stage.removeChild(child);
-          }
-        }else{
-          if (!child) {
-            shape = new Shape();
-            shape.artist = new Decorator(shape.graphics);
-            self.stage.addChildAt(shape, id);
-          } else {
-            shape = child;
-          }
+      if (instruction == 'move back') {
+        
+        self.stage.removeLastChild();
+      
+      } else if (instruction == 'move forward') {
+        
+        self.stage.addLastRemovedChild();
          
-          for (var prop in shapeData) {
-            if (shapeData.hasOwnProperty(prop)) {
-              if (shapeData[prop]) {
-                if (prop == 'bounds') {
-                  let bounds = shapeData.bounds;
-                  shape.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
-                }
-                else if (prop == 'commands') {
-                  if(shape.name=='selection'){
-                    shape.graphics.clear();
+      } else {
+        
+        data.forEach(function(shapeData) {
+  
+          let id = shapeData.id;
+          let index = (id-1);
+          let child = self.stage.getChildAt(index);
+  
+          if (instruction == 'remove') {
+            if(child){
+              self.stage.removeChildAt(index);
+            }
+          }else{
+            if (!child) {
+              shape = new Shape();
+              shape.artist = new Decorator(shape.graphics);
+              shape.id = id;
+              self.stage.addChild(shape);
+            } else {
+              shape = child;
+            }
+           
+            for (var prop in shapeData) {
+              if (shapeData.hasOwnProperty(prop)) {
+                if (shapeData[prop]) {
+                  if (prop == 'bounds') {
+                    let bounds = shapeData.bounds;
+                    shape.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
                   }
-                  var commands = shapeData.commands;
-                  commands.forEach(decorateShape);
-                }
-                else{
-                  shape[prop] = shapeData[prop];
+                  else if (prop == 'commands') {
+                    if(shape.name=='selection'){
+                      shape.graphics.clear();
+                    }
+                    var commands = shapeData.commands;
+                    commands.forEach(decorateShape);
+                  }
+                  else{
+                    shape[prop] = shapeData[prop];
+                  }
                 }
               }
             }
           }
-        }
-      });
+        });
+
+      }
+      
+      
+      
     }
 
     self.stage.update();
@@ -142,11 +160,15 @@ class Canvas extends React.Component {
           shape.x = startPoint.x;
           shape.y = startPoint.y;
           shape.points = [];
+  
 
           g = shape.graphics;
 
+            
+          var lastChild = self.stage.getLastChild();
+          shape.id = lastChild? (lastChild.id + 1) : 1;    
           self.stage.addChild(shape);
-
+         
           shape.points.push({x: shape.x, y: shape.y});
 
           selection = setTimeout(function() {
