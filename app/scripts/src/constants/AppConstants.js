@@ -5,4 +5,5 @@ export default keyMirror({
   UPDATE_STAGE: null,
   CHANGE_PENCIL_SIZE: null,
   CHANGE_PENCIL_COLOR: null,
+  NEW_USER: null,
 });

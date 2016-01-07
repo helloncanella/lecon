@@ -1,0 +1,33 @@
+#Phone{
+  display: flex;
+  position: absolute;
+  right: 0; 
+  top: 0; 
+  z-index: 10;
+  align-items: center; 
+  justify-content: space-around;
+  width: 125px;
+  padding: 20px;
+  
+  
+  
+  span{  
+    display: flex;    
+    align-items: center;
+  
+    &.hangup, &.duration{
+      display:none;
+    }
+    
+    &.call{
+      color:hsl(117, 72%, 40%);
+    }
+    
+    
+  
+    font-size:2em;
+  }
+  
+  
+  
+}

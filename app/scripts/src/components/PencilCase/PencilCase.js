@@ -26,10 +26,7 @@ class PencilCase extends React.Component {
      CanvasActions.changePencilColor(color);
     });
     
-    $('.eraser').click(function(e){
-      CanvasActions.changePencilColor('white');
-    })
- 
+   
     $('input').on({
       keydown: function(e) {
         var key = e.keyCode;
@@ -53,10 +50,10 @@ class PencilCase extends React.Component {
         <span className='color'><i className="fa fa-circle" data-color='blue'></i></span>
         <span className='color'><i className="fa fa-circle" data-color='green'></i></span>
         <span className='color'><i className="fa fa-circle" data-color='black'></i></span>
-        <span className='eraser'><i className="fa fa-eraser" data-color='white'></i></span>
         <span className='size'>
-          <h4>SIZE</h4>
+          <span className='sizeControl less'><i className="fa fa-minus" data-action='plus'></i></span>
           <input/>
+          <span className='sizeControl plus'><i className="fa fa-plus" data-action='less'></i></span>
         </span>
       </div>  
     );

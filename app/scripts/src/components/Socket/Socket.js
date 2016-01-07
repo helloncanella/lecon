@@ -2,6 +2,7 @@ import SocketStore from '../../stores/SocketStore';
 import SocketIO from 'socket.io-client';
 
 import CanvasActions from '../../actions/CanvasActions';
+import PhoneActions from '../../actions/PhoneActions';
 
 var socketClient = SocketIO();
 
@@ -12,12 +13,18 @@ var Socket = {
   }
 };
 
+
 socketClient.on('shape', function(data){
   CanvasActions.updateStage(data);
 });
 
-socketClient.on('mico', function(data){
-  console.log(data);
+socketClient.on('new user', function(data){
+  PhoneActions.insertNewUser(data);
 });
+
+
+
+
+
 
 SocketStore.addChangeListener(Socket.change);

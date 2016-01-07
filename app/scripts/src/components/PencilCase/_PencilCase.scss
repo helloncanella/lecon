@@ -9,31 +9,33 @@
   width: 500px;
   padding: 20px;
   
-  h4{
-    margin:0;
-    margin-bottom:2px;
-    font-size: 0.9em;
-  }
+  
   
   span{  
     display: flex;    
     align-items: center;
   
     &.size{
-      flex-direction: column;
+      
+      $pad: 7px;
+      
+      .less{
+        padding-right: $pad;
+      }
+      
+      .plus{
+        padding-left: $pad;
+      }
+      
     }
   
     &.color{
       font-size:2em;
     }
     
-    &.eraser{
-      font-size:30px;
-    }
-    
     input{
       text-align: center;
-      width:90px;
+      width:50px;
     }
   }
 }
