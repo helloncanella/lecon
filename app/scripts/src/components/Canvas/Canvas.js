@@ -45,7 +45,6 @@ class Canvas extends React.Component {
   componentWillReceiveProps (nextProps) {
 
     self.stage.update();
-
     
     let data = nextProps.toUpdate.shapes;
 
@@ -70,13 +69,16 @@ class Canvas extends React.Component {
           let child = self.stage.getChildAt(index);
   
           if (instruction == 'remove') {
+            
             self.stage.children.forEach(function(child){
               if (child.id == id){
                 self.stage.removeChild(child);  
-                console.log('remove', id, child);
               }
             });
-          }else{
+
+          }
+          
+          else{
             if (!child) {
               shape = new Shape();
               shape.artist = new Decorator(shape.graphics);
@@ -111,8 +113,6 @@ class Canvas extends React.Component {
         });
 
       }
-      
-      
       
     }
 
