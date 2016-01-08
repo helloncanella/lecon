@@ -2,6 +2,7 @@
 
 import React from 'react';
 import _ from 'lodash';
+import formatTime from './auxiliar/formatTime';
 
 import SocketActions from '../../actions/SocketActions';
 
@@ -23,8 +24,7 @@ class Phone extends React.Component {
     this.users = this.props.users;   
     
     var name = getNonNullName();
-    var phoneDiv = document.getElementById('Phone');
-    
+
     /*
       BUG - PhoneStore is sending an empty array before the reception of list of users, 
       the verification the uniquess verification of username is failing.  
@@ -51,10 +51,11 @@ class Phone extends React.Component {
     
     this.ctrl.receive(function(session){
 
-      self.hideCallIcon();
+      var clock;
 
       session.connected(function(session){
-        console.log(session);
+
+        self.hideCallIcon();
         
         var audio = $("<audio autoplay='autoplay'></audio>");
         $('#Phone').append(audio);
@@ -63,16 +64,31 @@ class Phone extends React.Component {
           'data-user': session.number,
           'src': session.video.currentSrc
         });
+        
+        startClock(session.started);
 
       });
 
       session.ended(function(session){
+        destroyClock();
         self.hideHangUpIcon();
         getAudioElement(session.number).remove();
       });
-        
+      
+      
+      function startClock(start){
+        clock = setInterval(function(){
+          var duration = formatTime(Math.floor((Date.now() - start)/1000));
+          $('.duration').html(duration);
+        },1000);
+      }
+
+      function destroyClock(){
+        clearInterval(clock);
+        $('.duration').html('00:00');
+      }
+      
     });
-    
     
     function getAudioElement(user){
       console.log($('*[data-user="'+user+'"]'));
@@ -146,6 +162,8 @@ class Phone extends React.Component {
         <span className='call' onClick={this.hello}><i className="fa fa-phone"></i></span>
         <span className='hangup'onClick={this.bye} ><i className="fa fa-stop"></i></span>
         <span className='duration'>0:00</span>
+        <audio id='signal'></audio>
+        
       </div> 
     );
   }
