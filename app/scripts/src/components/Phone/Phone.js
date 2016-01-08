@@ -23,7 +23,7 @@ class Phone extends React.Component {
     this.users = this.props.users;   
     
     var name = getNonNullName();
-    var phoneDiv = document.getElementById('phone');
+    var phoneDiv = document.getElementById('Phone');
     
     /*
       BUG - PhoneStore is sending an empty array before the reception of list of users, 
@@ -51,17 +51,33 @@ class Phone extends React.Component {
     
     this.ctrl.receive(function(session){
 
+      self.hideCallIcon();
+
       session.connected(function(session){
-        phoneDiv.appendChild(session.video);
+        console.log(session);
+        
+        var audio = $("<audio autoplay='autoplay'></audio>");
+        $('#Phone').append(audio);
+        
+        audio.attr({
+          'data-user': session.number,
+          'src': session.video.currentSrc
+        });
+
       });
 
       session.ended(function(session){
-        console.log(session.number);
-        self.ctrl.getVideoElement(session.number).remove();
+        self.hideHangUpIcon();
+        getAudioElement(session.number).remove();
       });
         
     });
     
+    
+    function getAudioElement(user){
+      console.log($('*[data-user="'+user+'"]'));
+      return $('*[data-user="'+user+'"]');
+    }
     
     // Forcing the retrivement of name different of null  
     function getNonNullName(){
@@ -76,6 +92,17 @@ class Phone extends React.Component {
   
   }
   
+  hideCallIcon(){
+    $('.call').css('display', 'none');
+    $('.hangup, .duration').css('display', 'inline');
+  }
+  
+  hideHangUpIcon(){
+    $('.call').css('display', 'inline');
+    $('.hangup, .duration').css('display', 'none');
+  }
+  
+  
   getUsername(name){
     let username;
     
@@ -89,7 +116,11 @@ class Phone extends React.Component {
     
   }
   
-  makeCall(){
+  bye(){
+    self.ctrl.hangup();
+  }
+  
+  hello(){
     
     if(!isPhoneReady){
       alert('Carregando telefone! \n \n Espere alguns segundos e aperte LIGAR novamente');      
@@ -111,9 +142,11 @@ class Phone extends React.Component {
   
   render () {
     return(
-      <div id='phone'>
-        <button onClick={this.makeCall}>Call</button>
-      </div>
+      <div id='Phone'>
+        <span className='call' onClick={this.hello}><i className="fa fa-phone"></i></span>
+        <span className='hangup'onClick={this.bye} ><i className="fa fa-stop"></i></span>
+        <span className='duration'>0:00</span>
+      </div> 
     );
   }
 

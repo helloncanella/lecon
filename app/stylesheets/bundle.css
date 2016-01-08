@@ -37,6 +37,35 @@
       text-align: center;
       width: 90px; }
 
+#Phone {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 10;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-justify-content: space-around;
+  -ms-flex-pack: distribute;
+  justify-content: space-around;
+  width: 125px;
+  padding: 20px; }
+  #Phone span {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    font-size: 2em; }
+    #Phone span.hangup, #Phone span.duration {
+      display: none; }
+    #Phone span.call {
+      color: #24af1d; }
+
 body {
   margin: 0;
   -webkit-user-select: none;
