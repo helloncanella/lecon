@@ -4,12 +4,12 @@ import EventEmmitter from 'events';
 import AppDispatcher from '../dispatcher/AppDispatcher';
 import Constants from '../constants/AppConstants';
 
-var dataToBroadcast;
- 
-var SocketStore = _.assign({}, EventEmmitter.prototype, {
+var allUsers = [];
 
-  getDataToBroadcast: function(){
-    return dataToBroadcast;
+var PhoneStore = _.assign({}, EventEmmitter.prototype, {
+  
+  getAllUsers: function(){
+    return allUsers;
   },
 
   emitChange: function(argument) {
@@ -25,20 +25,20 @@ var SocketStore = _.assign({}, EventEmmitter.prototype, {
   },
 
   dispatchToken: AppDispatcher.register(function(action) {
-   
+
     switch (action.type) {
-      case Constants.BROADCAST:
-        console.log('action',action);
-        dataToBroadcast = action.data;
-        console.log('dataToBroadcast', dataToBroadcast);
-        SocketStore.emitChange();
+      case Constants.UPDATE_USERS_LIST:
+        allUsers = action.users;
         break;
     }
 
+    PhoneStore.emitChange();
   }),
+
+
 
 });
 
 
 
-export default SocketStore;
+export default PhoneStore;

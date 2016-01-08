@@ -4,7 +4,7 @@ import EventEmmitter from 'events';
 import AppDispatcher from '../dispatcher/AppDispatcher';
 import Constants from '../constants/AppConstants';
 
-var toUpdate, color='purple', size='10';
+var toUpdate = '', color='purple', size='10';
 
 var CanvasStore = _.assign({}, EventEmmitter.prototype, {
 
