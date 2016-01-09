@@ -163,7 +163,6 @@ class Phone extends React.Component {
         <span className='hangup'onClick={this.bye} ><i className="fa fa-stop"></i></span>
         <span className='duration'>0:00</span>
         <audio id='signal'></audio>
-        
       </div> 
     );
   }
