@@ -1,96 +1,135 @@
-import SocketActions from '../../../actions/SocketActions';
-
-class Controller {
-  
-  constructor(stage){
-    this.stage = stage;
-    this.logPosition = stage.log.length - 1; 
-    this.stepsBack =  0; //liquid result (stepsBack - stepForward) of number of times ctrz-l was called.
-  }
-  
-  activate(){
+componentDidMount(){
+    this.users = this.props.users;   
     
-    $(window).on({
-      keydown: function(e){
-        var keyCode = e.keyCode;    
-        
-        if(e.ctrlKey){
-          switch (keyCode) {
-            case 90://z
-              moveBack(); //increase the number of children to remove
-              break;
-              
-            case 89://y
-              moveForward(); //decrease the number of children to remove
-              break;
-          }            
-        }
-        
-        else{
-          switch (keyCode) {
-            
-            case 46: //delete
-              var selected = this.stage.selectedShapes;
-              
-              if(selected.length>0){
-                deleteShapes(selected);
-              }
-              break;
-          }
-        }
-      },
-    })
-    
-    function deleteShapes(shapes){
-      /*
-        Remotion's broadcast needs to be called befor state.removeChild.
-        Otherwise shapes'id value will be transmitted as -1.  
-      */
-      //SocketActions.broadcast(shapes, 'remove');
+    var name = getNonNullName();
 
-      var selection = this.stage.getChildByName('selection');
-      this.stage.removeChild(selection);
-      
-      shapes.forEach(function(shape){
-        this.stage.removeChild(shape);
+    /*
+      BUG - PhoneStore is sending an empty array before the reception of list of users, 
+      the verification the uniquess verification of username is failing.  
+    */
+    this.username = this.getUsername(name);
+    
+    /*Updating the varible this.user*/  
+    SocketActions.insertNewUser(this.username);
+  
+    // IMPORTANT: window.phone needs to be set in order to the code to work properly!  
+    this.phone = window.phone = PHONE({
+        number: this.username,
+        publish_key   : 'pub-c-6151ab03-7650-41eb-9ba9-31cb851695d6',
+	      subscribe_key : 'sub-c-dd9411f4-b70c-11e5-b089-02ee2ddab7fe',
+	      media         : { audio : true, video : false },
+	      ssl: true
+      });
+    
+    this.ctrl = window.ctrl = CONTROLLER(this.phone);  
+    
+    this.ctrl.ready(function(pico){
+      isPhoneReady = true;
+    });
+    
+    this.ctrl.receive(function(session){
+
+      var clock;
+
+      session.connected(function(session){
+
+        self.hideCallIcon();
+        
+        var audio = $("<audio autoplay='autoplay'></audio>");
+        $('#Phone').append(audio);
+        
+        audio.attr({
+          'data-user': session.number,
+          'src': session.video.currentSrc
+        });
+        
+        startClock(session.started);
+
+      });
+
+      session.ended(function(session){
+        destroyClock();
+        self.hideHangUpIcon();
+        getAudioElement(session.number).remove();
       });
       
-      this.stage.update(); 
-    }
-    
-    function moveBack(){
       
-      this.stepsBack++;
-      this.stage.stepsBack = this.stepsBack;
-      
-      this.logPosition--;
-      
-      this.stage.loadLogItem(this.logPosition); //update the stage, without altering log
-    
-    }
-    
-    
-    function moveForward(){
-      if(this.stepsBack > 0){
-        
-        this.stepsBack--;
-        this.stage.stepsBack = this.stepsBack;
-        
-        this.logPosition++;
-        
-        this.stage.loadLogItem(this.logPosition);
-      
-        
+      function startClock(start){
+        clock = setInterval(function(){
+          var duration = formatTime(Math.floor((Date.now() - start)/1000));
+          $('.duration').html(duration);
+        },1000);
       }
+
+      function destroyClock(){
+        clearInterval(clock);
+        $('.duration').html('00:00');
+      }
+      
+    });
+    
+    function getAudioElement(user){
+      console.log($('*[data-user="'+user+'"]'));
+      return $('*[data-user="'+user+'"]');
+    }
+    
+    // Forcing the retrivement of name different of null  
+    function getNonNullName(){
+      var name = prompt('qual é o seu nome ?');
+      
+      if(!name){
+        name = getNonNullName();
+      }
+      
+      return name;
     }
   
+  }
+  
+  hideCallIcon(){
+    $('.call').css('display', 'none');
+    $('.hangup, .duration').css('display', 'inline');
+  }
+  
+  hideHangUpIcon(){
+    $('.call').css('display', 'inline');
+    $('.hangup, .duration').css('display', 'none');
+  }
+  
+  
+  getUsername(name){
+    let username;
     
-  } 
+    if(this.users.indexOf(name) === -1){
+      username = name;
+    }else{
+      username = this.getUsername(name + '*');
+    }
   
+    return username;
+    
+  }
   
-}
+  bye(){
+    self.ctrl.hangup();
+  }
+  
+  hello(){
+    
+    if(!isPhoneReady){
+      alert('Carregando telefone! \n \n Espere alguns segundos e aperte LIGAR novamente');      
+    }else{
+      let currentUser = self.username; 
+      
+      console.log(self.users);
+      
+      self.users.forEach(function(user){
+        
+        if(user && user !== currentUser ){
+          self.phone.dial(user);
+        } 
 
+      })  
+    }
 
-
-export default Controller;
-
+  }

@@ -8,54 +8,90 @@ import SocketActions from '../../actions/SocketActions';
 
 var self, isPhoneReady = false;
 
+var callingParticipants;
+
 class Phone extends React.Component {
 
   constructor(props) {
     super(props);
     self = this;
-  }
-  
-  componentWillReceiveProps(props){
-    this.users = props.users;
-    console.log(this.users);
+    this.contacts = [];
   }
   
   componentDidMount(){
-    this.users = this.props.users;   
     
-    var name = getNonNullName();
+    // USE IT IN PRODUCTION MODE, IN OTHER TO GUARANTEE UNIQUESS IN THE USERNAME
+    // $(function() {
+    //   $.getJSON("https://api.ipify.org?format=jsonp&callback=?",
+    //     function(json) {
+    //       self.username = json.ip;
+          
+    //       self.subscribeUser();
+    //       self.configPhone();
+    //     }
+    //   );
+    // });
 
-    /*
-      BUG - PhoneStore is sending an empty array before the reception of list of users, 
-      the verification the uniquess verification of username is failing.  
-    */
-    this.username = this.getUsername(name);
     
-    /*Updating the varible this.user*/  
-    SocketActions.insertNewUser(this.username);
+    self.username = prompt('seu nome');
+    self.subscribeUser();
+    self.configPhone();
+
+  }
   
-    // IMPORTANT: window.phone needs to be set in order to the code to work properly!  
+  subscribeUser(){
+    
+    this.usersManager = window.pubnub = PUBNUB.init({
+      publish_key: 'pub-c-6151ab03-7650-41eb-9ba9-31cb851695d6',
+      subscribe_key: 'sub-c-dd9411f4-b70c-11e5-b089-02ee2ddab7fe',
+      uuid: self.username,
+      ssl: true,
+    });
+    
+    this.usersManager.subscribe({
+      channel: 'classroom',
+      noheresync: true,
+      
+      message: function(m){
+        console.log(m);
+      },
+    
+      presence: function(subscription) {
+        console.log(subscription);
+      },
+    
+      state: {
+        name: self.username,
+        timestamp: new Date()
+      }
+    });
+
+  }
+  
+  configPhone(){
+    
     this.phone = window.phone = PHONE({
-        number: this.username,
-        publish_key   : 'pub-c-cff935ed-df99-44ec-89ad-6d35c34f1853',
-	      subscribe_key : 'sub-c-dfea45ae-b4be-11e5-a705-0619f8945a4f',
+        number: self.username,
+        publish_key   : 'pub-c-6151ab03-7650-41eb-9ba9-31cb851695d6',
+	      subscribe_key : 'sub-c-dd9411f4-b70c-11e5-b089-02ee2ddab7fe',
 	      media         : { audio : true, video : false },
 	      ssl: true
       });
-    
+      
     this.ctrl = window.ctrl = CONTROLLER(this.phone);  
-    
+  
     this.ctrl.ready(function(pico){
       isPhoneReady = true;
     });
-    
+
     this.ctrl.receive(function(session){
-
-      var clock;
-
+      
       session.connected(function(session){
 
-        self.hideCallIcon();
+        if(!self.clock){
+          self.hideCallIcon();
+          self.startClock(session.started);
+        }
         
         var audio = $("<audio autoplay='autoplay'></audio>");
         $('#Phone').append(audio);
@@ -64,48 +100,28 @@ class Phone extends React.Component {
           'data-user': session.number,
           'src': session.video.currentSrc
         });
-        
-        startClock(session.started);
+       
 
       });
-
+      
       session.ended(function(session){
-        destroyClock();
-        self.hideHangUpIcon();
-        getAudioElement(session.number).remove();
+        self.removeUser(session.number);
       });
-      
-      
-      function startClock(start){
-        clock = setInterval(function(){
-          var duration = formatTime(Math.floor((Date.now() - start)/1000));
-          $('.duration').html(duration);
-        },1000);
-      }
-
-      function destroyClock(){
-        clearInterval(clock);
-        $('.duration').html('00:00');
-      }
-      
-    });
     
-    function getAudioElement(user){
-      console.log($('*[data-user="'+user+'"]'));
-      return $('*[data-user="'+user+'"]');
-    }
+    })
     
-    // Forcing the retrivement of name different of null  
-    function getNonNullName(){
-      var name = prompt('qual é o seu nome ?');
-      
-      if(!name){
-        name = getNonNullName();
-      }
-      
-      return name;
-    }
+  }
   
+  startClock(start){
+    this.clock = setInterval(function(){
+      var duration = formatTime(Math.floor((Date.now() - start)/1000));
+      $('.duration').html(duration);
+    },1000);
+  }
+      
+  destroyClock(){
+    clearInterval(this.clock);
+    this.clock = null;
   }
   
   hideCallIcon(){
@@ -119,48 +135,66 @@ class Phone extends React.Component {
   }
   
   
-  getUsername(name){
-    let username;
-    
-    if(this.users.indexOf(name) === -1){
-      username = name;
-    }else{
-      username = this.getUsername(name + '*');
-    }
-  
-    return username;
-    
-  }
-  
-  bye(){
+  hangup(){
     self.ctrl.hangup();
+    self.hideHangUpIcon();
+    self.destroyClock();
   }
   
-  hello(){
+  removeUser(user){
+    $('*[data-user="'+user+'"]').remove();
     
-    if(!isPhoneReady){
-      alert('Carregando telefone! \n \n Espere alguns segundos e aperte LIGAR novamente');      
-    }else{
-      let currentUser = self.username; 
-      
-      console.log(self.users);
-      
-      self.users.forEach(function(user){
-        
-        if(user && user !== currentUser ){
-          self.phone.dial(user);
-        } 
+    var index = callingParticipants.indexOf(user);    
+    callingParticipants.splice(index,1);
 
-      })  
-    }
+    pubnub.here_now({
+      channel : 'classroom',
+      callback : function(m){
+        var onlineUsers = m.occupancy;
+        
+        if(callingParticipants.length <= 1 || onlineUsers <= 1){
+          self.destroyClock();
+          self.hangup();
+        }
+        
+      }
+    })
 
   }
+
+  call(){
+
+    let contacts;
+    
+    pubnub.here_now({
+      
+      channel : 'classroom',
+      
+      callback : function(m){
+        let contacts = m.uuids;
+      
+        if(contacts.length <= 1){
+          alert('A sala está vazia');
+        }else{
+          callingParticipants = contacts;
+          contacts.forEach( function(contact){
+            if(contact !== self.username){
+              self.phone.dial(contact);
+            }
+          });
+        }
+      }
+    
+      
+    })
+  }
+  
   
   render () {
     return(
       <div id='Phone'>
-        <span className='call' onClick={this.hello}><i className="fa fa-phone"></i></span>
-        <span className='hangup'onClick={this.bye} ><i className="fa fa-stop"></i></span>
+        <span className='call' onClick={this.call}><i className="fa fa-phone"></i></span>
+        <span className='hangup' onClick = {this.hangup}><i className="fa fa-stop"></i></span>
         <span className='duration'>0:00</span>
         <audio id='signal'></audio>
       </div> 

@@ -6,7 +6,6 @@ import Phone from './components/Phone/Phone';
 import PencilCase from './components/PencilCase/PencilCase';
 
 import CanvasStore from './stores/CanvasStore';
-import PhoneStore from './stores/PhoneStore';
 
 var self;
 
@@ -15,7 +14,6 @@ function getAppStates (){
     toUpdate: CanvasStore.getShapesToUpdate(),
     color: CanvasStore.getPencilColor(),
     size: CanvasStore.getPencilSize(),
-    users: PhoneStore.getAllUsers()
   });
 }
 
@@ -37,8 +35,7 @@ class AppView extends React.Component {
     });
 
     CanvasStore.addChangeListener(this.onChange);
-    PhoneStore.addChangeListener(this.onChange);
-    
+
     
   }
 
@@ -54,7 +51,7 @@ class AppView extends React.Component {
 
     return( 
       <div>
-        <Phone users={this.state.users} />
+        <Phone />
         <PencilCase />
         <Canvas color={color} size={size} toUpdate={toUpdate} id={'canvas'} width={3000} height={3000}/>
       </div>

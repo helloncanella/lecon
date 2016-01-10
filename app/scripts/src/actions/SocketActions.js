@@ -16,20 +16,6 @@ var SocketActions = {
       }
     };
     AppDispatcher.handleAction(action);
-  },
-  insertNewUser: function(user) {
-   
-    let action = {
-      type: Constants.BROADCAST,
-      data: {
-        socketEvent: 'new user',
-        data: {
-          user: user
-        }
-      }
-    };
-     debugger;
-    AppDispatcher.handleAction(action);
   }
 };
 

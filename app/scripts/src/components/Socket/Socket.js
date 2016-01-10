@@ -20,14 +20,6 @@ socketClient.on('shape', function(data){
   CanvasActions.updateStage(data);
 });
 
-socketClient.on('users update', function(data){
-  PhoneActions.updateUsersList(data);
-});
-
-
-
-
-
 
 
 SocketStore.addChangeListener(Socket.change);

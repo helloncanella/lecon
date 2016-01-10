@@ -15,25 +15,12 @@ app.get('/', function(req, res) {
 
 io.on('connection', function(socket) {
   
-  broadcastUsersList();
 
   socket.on('shape update', function(data) {
     socket.broadcast.emit('shape', data);
   });
   
-  socket.on('new user', function(data) {
-    broadcastUsersList(data);
-  });
-  
-  function broadcastUsersList (data){
 
-    if(data){
-      users.push(data.user);
-    }
-    
-    socket.emit('users update', users);
-
-  }
 });
 
 server.listen(process.env.PORT || 3000);
