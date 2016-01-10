@@ -53,9 +53,7 @@ class PencilCase extends React.Component {
         <span className='color'><i className="fa fa-circle" data-color='blue'></i></span>
         <span className='color'><i className="fa fa-circle" data-color='green'></i></span>
         <span className='color'><i className="fa fa-circle" data-color='black'></i></span>
-        <span className='eraser'><i className="fa fa-eraser" data-color='white'></i></span>
         <span className='size'>
-          <h4>SIZE</h4>
           <input/>
         </span>
       </div>  

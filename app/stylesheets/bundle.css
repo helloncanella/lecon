@@ -12,12 +12,8 @@
   -webkit-justify-content: space-around;
   -ms-flex-pack: distribute;
   justify-content: space-around;
-  width: 500px;
+  width: 325px;
   padding: 20px; }
-  #PencilCase h4 {
-    margin: 0;
-    margin-bottom: 2px;
-    font-size: 0.9em; }
   #PencilCase span {
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -25,17 +21,11 @@
     -webkit-align-items: center;
     -ms-flex-align: center;
     align-items: center; }
-    #PencilCase span.size {
-      -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-      flex-direction: column; }
     #PencilCase span.color {
       font-size: 2em; }
-    #PencilCase span.eraser {
-      font-size: 30px; }
     #PencilCase span input {
       text-align: center;
-      width: 90px; }
+      width: 30px; }
 
 #Phone {
   display: -webkit-flex;

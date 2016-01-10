@@ -21,21 +21,21 @@ class Phone extends React.Component {
   componentDidMount(){
     
     // USE IT IN PRODUCTION MODE, IN OTHER TO GUARANTEE UNIQUESS IN THE USERNAME
-    // $(function() {
-    //   $.getJSON("https://api.ipify.org?format=jsonp&callback=?",
-    //     function(json) {
-    //       self.username = json.ip;
+    $(function() {
+      $.getJSON("https://api.ipify.org?format=jsonp&callback=?",
+        function(json) {
+          self.username = json.ip;
           
-    //       self.subscribeUser();
-    //       self.configPhone();
-    //     }
-    //   );
-    // });
+          self.subscribeUser();
+          self.configPhone();
+        }
+      );
+    });
 
     
-    self.username = prompt('seu nome');
-    self.subscribeUser();
-    self.configPhone();
+    // self.username = prompt('seu nome');
+    // self.subscribeUser();
+    // self.configPhone();
 
   }
   
@@ -176,7 +176,8 @@ class Phone extends React.Component {
         if(contacts.length <= 1){
           alert('A sala está vazia');
         }else{
-          callingParticipants = contacts;
+          // it is used to track the number of participants in the call
+          callingParticipants = contacts; 
           contacts.forEach( function(contact){
             if(contact !== self.username){
               self.phone.dial(contact);
